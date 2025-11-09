@@ -50,6 +50,6 @@ Proyek ini dilisensikan di bawah MIT License.
 Kontak
 Untuk pertanyaan atau informasi lebih lanjut, silakan hubungi:
 
-Nama: Ade Rainhard Pasaribu
-Email: aderainhardp@gmail.com
+Nama: Rizki Nata Wirawan
+Email: rizkinataw@gmail.com
 Terima kasih telah mengunjungi proyek kami!
