@@ -30,9 +30,7 @@ body{font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, Arial, sans
 .link-accent{color:var(--accent); text-decoration:none;}
 .link-accent:hover{color:#fff; text-decoration:underline;}
 
-.form-control-dark, .form-select-dark{
-  background:var(--dark-850); color:#fff; border:1px solid var(--dark-700);
-}
+.form-control-dark, .form-select-dark{ background:var(--dark-850); color:#fff; border:1px solid var(--dark-700); }
 .form-control-dark::placeholder{color:var(--dark-300);}
 .dropdown-dark{background:var(--dark-900); border:1px solid var(--dark-700);}
 .dropdown-dark .dropdown-item{color:#fff;}
@@ -59,84 +57,33 @@ body{font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, Arial, sans
   border-color:var(--accent);
   box-shadow:0 8px 24px rgba(0,0,0,.35);
 }
-.card.song .cover{
-  height:180px; object-fit:cover; border-radius:.75rem;
-}
+.card.song .cover{ height:180px; object-fit:cover; border-radius:.75rem; }
 .badge-soft{background:rgba(255,255,255,.05); border:1px solid var(--dark-700); color:#fff;}
 
-.list-group-dark .list-group-item{
-  background:var(--dark-900); color:#fff; border-color:var(--dark-700);
-}
+.list-group-dark .list-group-item{ background:var(--dark-900); color:#fff; border-color:var(--dark-700); }
 
 .auth-card{width:380px;}
 
 .btn-like.active{background:var(--accent); color:#fff; border-color:var(--accent);}
-
 .song-detail-cover{max-width:260px; border-radius:1rem;}
 .song-detail-box{background:var(--dark-900); border:1px solid var(--dark-700); border-radius:1rem; padding:1rem;}
+.btn-like:hover { box-shadow: 0 0 12px rgba(182,37,42,0.4); }
+.btn-like { transition: all 0.25s ease; }
+.badge.bg-accent-soft { color: var(--accent); font-weight: 500; }
 
-/* Efek glow lembut saat hover like */
-.btn-like:hover {
-  box-shadow: 0 0 12px rgba(182,37,42,0.4);
+/* komentar - kontras lebih baik */
+#commentList .list-group-item .bi-person{ color:var(--accent)!important; margin-right:4px; }
+#commentList .list-group-item div:last-child{ color:var(--dark-100)!important; font-weight:400; }
+
+/* judul & artis di kartu */
+.card.song .fw-semibold{ color:var(--dark-100)!important; font-weight:600; letter-spacing:.2px; }
+.card.song .small.text-dark-300{ color:var(--dark-200)!important; }
+
+/* === Search results bar (hasil di atas) === */
+.search-results-bar{
+  position: relative;
+  background: var(--dark-900);
+  border-bottom: 1px solid var(--dark-700);
 }
-
-/* Transisi halus pas toggle active/unactive */
-.btn-like {
-  transition: all 0.25s ease;
-}
-
-/* Tambahan untuk badge likes di kartu lagu */
-.badge.bg-accent-soft {
-  color: var(--accent);
-  font-weight: 500;
-}
-
-/* === PERBAIKAN KONTRAS KOMENTAR & USERNAME === */
-
-/* warna username di komentar */
-#commentList .list-group-item .small.text-dark-200 {
-  color: var(--dark-100) !important; /* ganti jadi terang */
-  font-weight: 500;
-}
-
-/* ikon user dan nama jadi merah accent */
-#commentList .list-group-item .bi-person {
-  color: var(--accent) !important;
-  margin-right: 4px;
-}
-
-/* nama user lebih mencolok */
-#commentList .list-group-item .small.text-dark-200 i,
-#commentList .list-group-item .small.text-dark-200 {
-  color: var(--accent) !important;
-  font-weight: 600;
-}
-
-/* teks komentar tetap putih agar jelas */
-#commentList .list-group-item div:last-child {
-  color: var(--dark-100);
-  font-weight: 400;
-}
-
-/* === PERBAIKAN KONTRAS JUDUL LAGU DI CARD === */
-.card.song .fw-semibold {
-  color: var(--dark-100) !important;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-}
-
-/* teks artis di bawahnya sedikit lebih terang */
-.card.song .small.text-dark-300 {
-  color: var(--dark-200) !important;
-}
-
-/* === WARNA TEKS KOMENTAR === */
-#commentList .list-group-item {
-  background: var(--dark-900) !important; /* biar sesuai tema dark */
-  border-color: var(--dark-700) !important;
-}
-
-#commentList .list-group-item div:last-child {
-  color: var(--dark-100) !important;   /* isi komentar jadi putih terang */
-  font-weight: 400;
-}
+.search-results-bar .card.song .cover{ height:140px; }
+.d-none{ display: none !important; }
