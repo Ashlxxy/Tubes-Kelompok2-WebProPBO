@@ -2,7 +2,7 @@
 
 Aplikasi pemutar musik berbasis web yang modern dan dinamis untuk UKM Band Universitas Telkom. Dibangun menggunakan framework **Laravel 10**, aplikasi ini menawarkan pengalaman mendengarkan musik yang interaktif dengan fitur manajemen playlist, like, komentar, dan dashboard admin yang lengkap.
 
-![Dashboard Preview](/home/cyrus/.gemini/antigravity/brain/36c562d0-d29e-4570-975e-aa5d197d92a0/admin_feedback_final_1764266730951.png)
+![Dashboard Preview](https://cdn.discordapp.com/attachments/989113082393542668/1444958213232529438/image.png?ex=692e99b4&is=692d4834&hm=110891551047b478bb46990d9c7cc5beb34609f226eb6541daa7ba3756fbee9d&)
 
 ## 🚀 Fitur Utama
 
@@ -114,6 +114,4 @@ Ikuti langkah ini untuk menjalankan aplikasi di komputer Anda.
 | **Admin** | `admin@ukmband.telkom` | `admin123` |
 | **User** | `user@example.com` | `password` |
 
----
 
-**Dibuat oleh Kelompok 2 - Web Programming & PBO**
