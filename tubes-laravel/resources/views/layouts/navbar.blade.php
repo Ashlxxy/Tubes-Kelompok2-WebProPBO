@@ -38,11 +38,11 @@
                 </ul>
             </li>
           @else
-            <li class="nav-item ms-lg-2">
-                <a href="{{ route('login') }}" class="btn btn-outline-accent btn-sm">Login</a>
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                <a href="{{ route('login') }}" class="btn btn-outline-accent btn-sm w-100 w-lg-auto">Login</a>
             </li>
-            <li class="nav-item ms-2">
-                <a href="{{ route('register') }}" class="btn btn-accent btn-sm">Register</a>
+            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                <a href="{{ route('register') }}" class="btn btn-accent btn-sm w-100 w-lg-auto">Register</a>
             </li>
           @endauth
         </ul>

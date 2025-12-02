@@ -5,11 +5,8 @@
 @section('content')
 <div class="container-xxl py-4 fade-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Admin Dashboard</h3>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.feedback.index') }}" class="btn btn-outline-accent">Lihat Feedback</a>
-            <a href="{{ route('admin.songs.create') }}" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Tambah Lagu</a>
-        </div>
+        <h3>Manajemen Lagu</h3>
+        <a href="{{ route('admin.songs.create') }}" class="btn btn-accent"><i class="bi bi-plus-lg"></i> Tambah Lagu</a>
     </div>
 
     <div class="card-dark rounded-4 overflow-hidden">
@@ -55,10 +52,9 @@
             </table>
         </div>
     </div>
-    </div>
 
     <div class="mt-5">
-        <h4 class="mb-3">Feedback Pengguna</h4>
+        <h4 class="mb-3 text-start">Feedback Pengguna</h4>
         <div class="card-dark rounded-4 overflow-hidden">
             <div class="list-group list-group-flush">
                 @forelse($feedbacks as $feedback)
