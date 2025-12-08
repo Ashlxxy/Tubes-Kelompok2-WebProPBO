@@ -63,19 +63,58 @@
             <div class="alert alert-dark mb-4">Silakan login untuk menulis komentar.</div>
             @endauth
 
-            <div class="list-group list-group-flush rounded-3 overflow-hidden">
-                @forelse($song->comments as $comment)
-                <div class="list-group-item bg-dark-900 border-dark-700 p-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="fw-bold text-white">{{ $comment->user->name }}</span>
-                        <small class="text-dark-300">{{ $comment->created_at->diffForHumans() }}</small>
+            <div class="list-group list-group-flush rounded-3 overflow-hidden" id="commentList">
+                @forelse($song->comments->where('parent_id', null) as $comment)
+                    <!-- Parent Comment -->
+                    <div class="list-group-item bg-dark-900 border-dark-700 p-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold text-white">{{ $comment->user->name }}</span>
+                            <small class="text-dark-300">{{ $comment->created_at->diffForHumans() }}</small>
+                        </div>
+                        <p class="mb-2 text-white">{{ $comment->content }}</p>
+                        
+                        @auth
+                            <button class="btn btn-sm btn-link link-accent text-decoration-none p-0 mb-2" onclick="toggleReplyForm({{ $comment->id }})">
+                                <i class="bi bi-reply-fill"></i> Balas
+                            </button>
+                            
+                            <!-- Reply Form -->
+                            <form action="{{ route('songs.comments.store', $song->id) }}" method="POST" class="mb-3 d-none" id="replyForm-{{ $comment->id }}">
+                                @csrf
+                                <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="content" class="form-control form-control-dark" placeholder="Tulis balasan..." required>
+                                    <button class="btn btn-accent" type="submit"><i class="bi bi-send"></i></button>
+                                </div>
+                            </form>
+                        @endauth
+
+                        <!-- Replies -->
+                        @if($comment->replies->count() > 0)
+                            <div class="ms-4 border-start border-dark-700 ps-3 mt-2">
+                                @foreach($comment->replies as $reply)
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-bold text-white small">{{ $reply->user->name }}</span>
+                                            <small class="text-dark-300" style="font-size: 0.75rem;">{{ $reply->created_at->diffForHumans() }}</small>
+                                        </div>
+                                        <p class="mb-0 text-dark-200 small">{{ $reply->content }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
-                    <p class="mb-0 text-white">{{ $comment->content }}</p>
-                </div>
                 @empty
-                <div class="text-dark-300 py-3">Belum ada komentar.</div>
+                    <div class="text-dark-300 py-3 text-center">Belum ada komentar. Jadilah yang pertama!</div>
                 @endforelse
             </div>
+
+            <script>
+                function toggleReplyForm(commentId) {
+                    const form = document.getElementById(`replyForm-${commentId}`);
+                    form.classList.toggle('d-none');
+                }
+            </script>
         </div>
     </div>
 </div>

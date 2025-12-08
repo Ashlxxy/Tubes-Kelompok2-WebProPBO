@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Song;
 use App\Models\History;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,14 +72,17 @@ class SongController extends Controller
     {
         $request->validate([
             'content' => 'required|string|max:500',
+            'parent_id' => 'nullable|exists:comments,id'
         ]);
 
-        $song->comments()->create([
+        Comment::create([
             'user_id' => Auth::id(),
+            'song_id' => $song->id,
             'content' => $request->content,
+            'parent_id' => $request->parent_id
         ]);
 
-        return back()->with('success', 'Komentar terkirim!');
+        return back()->with('success', 'Komentar berhasil ditambahkan!');
     }
     
     public function stream(Song $song)
