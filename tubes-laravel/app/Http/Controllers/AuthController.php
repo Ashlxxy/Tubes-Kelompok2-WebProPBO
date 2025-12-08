@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
+        return view('auth.portal');
     }
 
     public function login(Request $request)
@@ -27,13 +27,14 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
     public function showRegister()
     {
-        return view('auth.register');
+        session()->flash('register_active', true);
+        return view('auth.portal');
     }
 
     public function register(Request $request)
@@ -53,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('home'))->with('success', 'Registration successful!');
+        return redirect(route('home'))->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 
     public function logout(Request $request)

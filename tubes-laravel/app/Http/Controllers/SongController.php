@@ -30,12 +30,21 @@ class SongController extends Controller
         $song->increment('plays');
 
         // Record history if logged in
+        // Record history if logged in
         if (Auth::check()) {
-            History::create([
-                'user_id' => Auth::id(),
-                'song_id' => $song->id,
-                'played_at' => now(),
-            ]);
+            $history = History::where('user_id', Auth::id())
+                              ->where('song_id', $song->id)
+                              ->first();
+
+            if ($history) {
+                $history->update(['played_at' => now()]);
+            } else {
+                History::create([
+                    'user_id' => Auth::id(),
+                    'song_id' => $song->id,
+                    'played_at' => now(),
+                ]);
+            }
         }
 
         return view('songs.show', compact('song'));
@@ -55,7 +64,7 @@ class SongController extends Controller
             $status = 'liked';
         }
 
-        return back()->with('success', $status === 'liked' ? 'Liked!' : 'Unliked!');
+        return back()->with('success', $status === 'liked' ? 'Disukai!' : 'Batal menyukai!');
     }
 
     public function storeComment(Request $request, Song $song)

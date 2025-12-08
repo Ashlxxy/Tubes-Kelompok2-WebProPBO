@@ -7,7 +7,7 @@
         <h1 class="display-5 fw-bold lh-1">Temukan dan dengarkan<br><span class="text-accent">UKM Band Universitas Telkom</span></h1>
         <p class="lead text-dark-200 mt-3">Dengarkan lagu, baca deskripsi, simpan ke playlist, dan beri apresiasi.</p>
         <div class="d-flex gap-2 mt-2">
-          <a class="btn btn-accent" href="{{ route('songs.index') }}"><i class="bi bi-collection-play me-1"></i>Lihat Semua Lagu</a>
+          <a class="btn btn-accent" href="{{ route('songs.index') }}">Lihat Semua Lagu</a>
           <a class="btn btn-outline-accent" href="#popular"><i class="bi bi-fire me-1"></i>Populer</a>
         </div>
       </div>
@@ -31,8 +31,8 @@
   <main class="container-xxl pb-5">
     <section id="popular" class="mt-4 fade-in" style="animation-delay: 0.4s;">
       <div class="d-flex justify-content-between align-items-end mb-2">
-        <h3 class="mb-0">Most Popular</h3>
-        <small class="text-dark-300">Berdasarkan like + pemutaran</small>
+        <h3 class="mb-0">Paling Populer</h3>
+        <small class="text-dark-300"><i>Berdasarkan Pemutaran & Like</i></small>
       </div>
       <div class="row g-3">
           @forelse($popularSongs as $song)

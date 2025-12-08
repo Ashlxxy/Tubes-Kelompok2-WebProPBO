@@ -17,7 +17,7 @@
                     <h4 class="mb-0">{{ $playlist->name }}</h4>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editPlaylistModal{{ $playlist->id }}"><i class="bi bi-pencil"></i></button>
-                        <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST" onsubmit="return confirm('Hapus playlist ini?')">
+                        <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST" onsubmit="return confirm('Anda yakin menghapus Playlist ini?')">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
@@ -71,7 +71,7 @@
 
         @empty
         <div class="col-12 text-center text-dark-300 py-5">
-            Belum ada playlist. Buat satu sekarang!
+            Belum ada playlist, buat playlist sekarang!
         </div>
         @endforelse
     </div>

@@ -11,14 +11,14 @@
         <form class="ms-lg-3 my-2 my-lg-0 d-flex flex-grow-1" action="{{ route('songs.index') }}" method="GET">
           <span class="input-group">
             <span class="input-group-text bg-dark-800 border-dark-700 text-dark-100"><i class="bi bi-search"></i></span>
-            <input class="form-control form-control-dark" name="q" type="search" placeholder="Cari lagu, artis..." aria-label="Search" value="{{ request('q') }}">
+            <input class="form-control form-control-dark" name="q" type="search" placeholder="Cari judul lagu atau nama band" aria-label="Search" value="{{ request('q') }}">
           </span>
         </form>
         <ul class="navbar-nav ms-lg-3 align-items-lg-center">
           <li class="nav-item"><a class="nav-link" href="{{ route('songs.index') }}"><i class="bi bi-collection-play me-1"></i>Daftar Lagu</a></li>
           @auth
-            <li class="nav-item"><a class="nav-link" href="{{ route('playlists.index') }}"><i class="bi bi-music-note-list me-1"></i>Playlist Saya</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('feedback.index') }}"><i class="bi bi-chat-left-text me-1"></i>Feedback</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('playlists.index') }}"><i class="bi bi-music-note-list me-1"></i>Playlist</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('feedback.index') }}"><i class="bi bi-chat-left-text me-1"></i>Contact Us</a></li>
             <li class="nav-item dropdown ms-lg-2">
                 <a class="nav-link btn btn-outline-accent px-3 py-1 rounded-pill dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 <i class="bi bi-person-circle me-1"></i><span>{{ Auth::user()->name }}</span>

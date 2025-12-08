@@ -19,7 +19,7 @@ class PlaylistController extends Controller
     {
         $request->validate(['name' => 'required']);
         Auth::user()->playlists()->create(['name' => $request->name]);
-        return back()->with('success', 'Playlist created.');
+        return back()->with('success', 'Playlist berhasil dibuat.');
     }
 
     public function update(Request $request, Playlist $playlist)
@@ -36,17 +36,17 @@ class PlaylistController extends Controller
         
         if ($request->has('remove_song_id')) {
             $playlist->songs()->detach($request->remove_song_id);
-            return back()->with('success', 'Song removed from playlist.');
+            return back()->with('success', 'Lagu dihapus dari playlist.');
         }
 
         $playlist->update($request->only('name'));
-        return back()->with('success', 'Playlist updated.');
+        return back()->with('success', 'Playlist diperbarui.');
     }
 
     public function destroy(Playlist $playlist)
     {
         if ($playlist->user_id !== Auth::id()) abort(403);
         $playlist->delete();
-        return back()->with('success', 'Playlist deleted.');
+        return back()->with('success', 'Playlist berhasil dihapus.');
     }
 }

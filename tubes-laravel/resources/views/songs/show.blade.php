@@ -39,7 +39,7 @@
                 <div class="mt-auto pt-4">
                     <audio controls class="w-100 custom-audio">
                         <source src="{{ route('songs.stream', $song->id) }}" type="audio/mpeg">
-                        Your browser does not support the audio element.
+                        Browser Anda tidak mendukung elemen audio.
                     </audio>
                 </div>
             </div>

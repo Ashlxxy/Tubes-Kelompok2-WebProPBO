@@ -35,33 +35,26 @@
                 <!-- Contact Info Section -->
                 <div class="col-md-5 bg-dark-900 p-5 border-start border-dark-700 d-flex flex-column justify-content-center">
                     <h4 class="mb-4"><i class="bi bi-telephone me-2"></i>Contact Us</h4>
-                    <p class="text-dark-200 mb-4">Penyedia Platform Website</p>
                     
                     <div class="mb-3">
-                        <div class="d-flex align-items-center mb-2">
+                        <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-envelope me-3 text-dark-300"></i>
-                            <span>support@platformweb.example</span>
+                            <span>ukmbandtelkom@gmail.com</span>
                         </div>
-                        <div class="d-flex align-items-center mb-2">
+                        <div class="d-flex align-items-center mb-3">
                             <i class="bi bi-telephone me-3 text-dark-300"></i>
-                            <span>+62 812 3456 7890</span>
+                            <span>+62 857 1889 2031</span>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-geo-alt me-3 text-dark-300"></i>
-                            <span>Jl. Contoh No. 123, Bandung</span>
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-geo-alt me-3 text-dark-300 mt-1"></i>
+                            <span>Jl. Telekomunikasi No.1, Sukapura, Kec. Dayeuhkolot, Kabupaten Bandung, Jawa Barat 40257</span>
                         </div>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-dark-800 rounded text-dark-300 small">
-                        Peta/Embed provider (opsional)
                     </div>
                 </div>
             </div>
-
-            <div class="mt-4">
-                <h5 class="mb-3">Feedback Terkirim (mock)</h5>
-                <div class="text-dark-300">Belum ada feedback.</div>
-            </div>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
