@@ -23,12 +23,12 @@
                 <div class="row g-3">
                     @forelse($playlist->songs as $song)
                     <div class="col-6 col-md-3 col-lg-2">
-                        <div class="card song p-2 h-100 position-relative group-hover">
+                        <div class="card song p-2 h-100 position-relative group-hover" style="cursor: pointer;" onclick="window.location.href='{{ route('songs.show', $song->id) }}'">
                             <img src="{{ asset($song->cover_path) }}" class="cover w-100 mb-2 rounded" alt="{{ $song->title }}">
                             <div class="fw-semibold text-truncate">{{ $song->title }}</div>
                             <div class="small text-dark-300 text-truncate">{{ $song->artist }}</div>
                             
-                            <form action="{{ route('playlists.update', $playlist->id) }}" method="POST" class="position-absolute top-0 end-0 m-1">
+                            <form action="{{ route('playlists.update', $playlist->id) }}" method="POST" class="position-absolute top-0 end-0 m-1" onclick="event.stopPropagation()">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="remove_song_id" value="{{ $song->id }}">
