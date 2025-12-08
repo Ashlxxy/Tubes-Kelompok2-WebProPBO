@@ -69,6 +69,9 @@
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-accent btn-lg">Masuk</button>
                     </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ route('home') }}" class="link-accent small">Kembali mendengarkan lagu</a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -114,6 +117,9 @@
 
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-accent btn-lg">Daftar</button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ route('home') }}" class="link-accent small">Kembali mendengarkan lagu</a>
                     </div>
                 </form>
             </div>

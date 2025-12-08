@@ -11,7 +11,7 @@
         <form class="ms-lg-3 my-2 my-lg-0 d-flex flex-grow-1" action="{{ route('songs.index') }}" method="GET">
           <span class="input-group">
             <span class="input-group-text bg-dark-800 border-dark-700 text-dark-100"><i class="bi bi-search"></i></span>
-            <input class="form-control form-control-dark" name="q" type="search" placeholder="Cari judul lagu atau nama band" aria-label="Search" value="{{ request('q') }}">
+            <input class="form-control form-control-dark" name="q" type="search" placeholder="Cari judul lagu atau nama band..." aria-label="Search" value="{{ request('q') }}">
           </span>
         </form>
         <ul class="navbar-nav ms-lg-3 align-items-lg-center">
