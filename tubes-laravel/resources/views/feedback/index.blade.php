@@ -34,7 +34,7 @@
 
                 <!-- Contact Info Section -->
                 <div class="col-md-5 bg-dark-900 p-5 border-start border-dark-700 d-flex flex-column justify-content-center">
-                    <h4 class="mb-4"><i class="bi bi-telephone me-2"></i>Contact Us</h4>
+                    <h4 class="mb-4"><i class="bi bi-telephone me-2"></i>Hubungi Kami</h4>
                     
                     <div class="mb-3">
                         <div class="d-flex align-items-center mb-3">

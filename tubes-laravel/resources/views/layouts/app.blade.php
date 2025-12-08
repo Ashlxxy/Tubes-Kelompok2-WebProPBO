@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" href="{{ asset('assets/img/logo.png') }}">
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <script src="https://unpkg.com/swup@4"></script>
+  <script src="https://unpkg.com/@swup/forms-plugin@4"></script>
   <style>
       /* Custom Animations */
       .fade-in { animation: fadeIn 0.8s ease-in-out; }
