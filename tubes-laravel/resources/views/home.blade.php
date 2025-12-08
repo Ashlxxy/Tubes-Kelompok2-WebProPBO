@@ -92,7 +92,7 @@
       @endif
 
       <!-- Spacer to prevent content from being hidden behind the player -->
-      <div style="height: 120px;"></div>
+
     </section>
   </main>
 

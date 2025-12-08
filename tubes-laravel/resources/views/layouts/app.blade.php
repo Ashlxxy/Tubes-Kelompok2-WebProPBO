@@ -53,6 +53,7 @@
         </div>
     @endif
     @yield('content')
+    <div style="height: 120px;"></div>
   </main>
 
   @include('partials.player')

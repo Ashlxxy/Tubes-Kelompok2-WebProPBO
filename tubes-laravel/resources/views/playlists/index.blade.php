@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="list-group list-group-flush rounded-3 overflow-hidden">
+                <div class="list-group list-group-flush rounded-3 overflow-hidden" data-songs="{{ json_encode($playlist->songs) }}">
                     @forelse($playlist->songs as $song)
                     <a href="{{ route('songs.show', $song->id) }}" class="list-group-item list-group-item-action bg-dark-900 border-dark-700 p-3 d-flex justify-content-between align-items-center group-hover container-action text-decoration-none">
                         <div class="d-flex align-items-center gap-3">
@@ -51,7 +51,7 @@
                         </div>
                         
                         <div class="d-flex align-items-center gap-2">
-                             <button class="btn btn-sm btn-outline-accent btn-icon rounded-circle" onclick="event.preventDefault(); event.stopPropagation(); playSong({{ $song->id }})">
+                             <button class="btn btn-sm btn-outline-accent btn-icon rounded-circle" onclick="event.preventDefault(); event.stopPropagation(); var songs = JSON.parse(this.closest('.list-group').dataset.songs); setQueue(songs); playSong({{ $song->id }})">
                                 <i class="bi bi-play-fill text-xl"></i>
                             </button>
 
