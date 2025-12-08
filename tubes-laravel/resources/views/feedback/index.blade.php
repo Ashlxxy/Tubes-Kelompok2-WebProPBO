@@ -6,7 +6,7 @@
 <div class="container d-flex justify-content-center align-items-center min-vh-100" style="margin-top: -60px;">
     <div class="row w-100 justify-content-center">
         <div class="col-lg-10">
-            <h3 class="mb-4">Kirim Feedback</h3>
+            <h3 class="mb-4">Kirim Masukkan</h3>
             <div class="row g-0 rounded-4 overflow-hidden shadow-lg">
                 <!-- Form Section -->
                 <div class="col-md-7 card-dark p-5">

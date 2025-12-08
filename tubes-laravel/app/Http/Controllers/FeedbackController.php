@@ -22,7 +22,7 @@ class FeedbackController extends Controller
 
         Feedback::create($request->all());
 
-        return back()->with('success', 'Feedback sent successfully!');
+        return back()->with('success', 'Masukkan berhasil dikirim!');
     }
 
     public function adminIndex()

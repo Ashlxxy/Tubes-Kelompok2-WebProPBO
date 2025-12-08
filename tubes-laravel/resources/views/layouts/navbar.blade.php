@@ -18,7 +18,7 @@
           <li class="nav-item"><a class="nav-link" href="{{ route('songs.index') }}"><i class="bi bi-collection-play me-1"></i>Daftar Lagu</a></li>
           @auth
             <li class="nav-item"><a class="nav-link" href="{{ route('playlists.index') }}"><i class="bi bi-music-note-list me-1"></i>Playlist</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ route('feedback.index') }}"><i class="bi bi-chat-left-text me-1"></i>Contact Us</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ route('feedback.index') }}"><i class="bi bi-chat-left-text me-1"></i>Masukkan</a></li>
             <li class="nav-item dropdown ms-lg-2">
                 <a class="nav-link btn btn-outline-accent px-3 py-1 rounded-pill dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 <i class="bi bi-person-circle me-1"></i><span>{{ Auth::user()->name }}</span>

@@ -5,11 +5,18 @@
 @section('content')
 <div class="container-xxl py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">Semua Lagu</h3>
-        <form action="{{ route('songs.index') }}" method="GET" class="d-flex gap-2">
-            <input type="text" name="q" class="form-control form-control-dark form-control-sm" placeholder="Cari..." value="{{ request('q') }}">
-            <button type="submit" class="btn btn-sm btn-outline-accent"><i class="bi bi-search"></i></button>
-        </form>
+        <h3 class="mb-0">
+            @if(request('q'))
+                <i class="bi bi-search me-2"></i>Hasil Pencarian "{{ request('q') }}" ({{ $songs->count() }} hasil)
+            @else
+                Semua Lagu
+            @endif
+        </h3>
+        @if(request('q'))
+            <a href="{{ route('songs.index') }}" class="btn btn-outline-accent">
+                <i class="bi bi-collection-play me-1"></i> Lihat Semua
+            </a>
+        @endif
     </div>
 
     <div class="row g-3">

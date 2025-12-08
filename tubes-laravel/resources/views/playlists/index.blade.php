@@ -17,11 +17,7 @@
                     <h4 class="mb-0">{{ $playlist->name }}</h4>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editPlaylistModal{{ $playlist->id }}"><i class="bi bi-pencil"></i></button>
-                        <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST" onsubmit="return confirm('Anda yakin menghapus Playlist ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                        </form>
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePlaylistModal{{ $playlist->id }}"><i class="bi bi-trash"></i></button>
                     </div>
                 </div>
                 <div class="row g-3">
@@ -65,6 +61,29 @@
                             <button type="submit" class="btn btn-accent">Simpan</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deletePlaylistModal{{ $playlist->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content card-dark">
+                    <div class="modal-header border-dark-700">
+                        <h5 class="modal-title">Hapus Playlist?</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-dark-200">
+                        Apakah Anda yakin ingin menghapus playlist <strong>{{ $playlist->name }}</strong>? Tindakan ini tidak dapat dibatalkan.
+                    </div>
+                    <div class="modal-footer border-dark-700">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Hapus</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
