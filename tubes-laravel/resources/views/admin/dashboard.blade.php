@@ -35,11 +35,30 @@
                         <td class="text-end pe-4">
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('admin.songs.edit', $song->id) }}" class="btn btn-outline-accent"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ route('admin.songs.destroy', $song->id) }}" method="POST" onsubmit="return confirm('Hapus lagu ini?')" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                </form>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSongModal{{ $song->id }}"><i class="bi bi-trash"></i></button>
+                            </div>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade text-start" id="deleteSongModal{{ $song->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content card-dark">
+                                        <div class="modal-header border-dark-700">
+                                            <h5 class="modal-title">Hapus Lagu?</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-dark-200">
+                                            Apakah Anda yakin ingin menghapus lagu <strong>{{ $song->title }}</strong>?
+                                        </div>
+                                        <div class="modal-footer border-dark-700">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <form action="{{ route('admin.songs.destroy', $song->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
