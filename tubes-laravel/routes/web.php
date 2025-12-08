@@ -25,6 +25,7 @@ Route::get('/songs/{song}/stream', [SongController::class, 'stream'])->name('son
 
 // User Protected
 Route::middleware(['auth'])->group(function () {
+    Route::post('/songs/{song}/record-play', [SongController::class, 'recordPlay'])->name('songs.recordPlay');
     Route::post('/songs/{song}/like', [SongController::class, 'like'])->name('songs.like');
     Route::post('/songs/{song}/comments', [SongController::class, 'storeComment'])->name('songs.comments.store');
     Route::resource('playlists', PlaylistController::class);

@@ -27,11 +27,13 @@ class SongController extends Controller
 
     public function show(Song $song)
     {
-        // Increment plays
+        return view('songs.show', compact('song'));
+    }
+
+    public function recordPlay(Song $song)
+    {
         $song->increment('plays');
 
-        // Record history if logged in
-        // Record history if logged in
         if (Auth::check()) {
             $history = History::where('user_id', Auth::id())
                               ->where('song_id', $song->id)
@@ -48,7 +50,7 @@ class SongController extends Controller
             }
         }
 
-        return view('songs.show', compact('song'));
+        return response()->json(['success' => true]);
     }
 
     public function like(Song $song)
@@ -87,6 +89,9 @@ class SongController extends Controller
     
     public function stream(Song $song)
     {
+        // Close the session to prevent blocking other requests while streaming
+        session_write_close();
+
         $path = public_path($song->file_path);
 
         if (!file_exists($path)) {

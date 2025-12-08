@@ -36,7 +36,7 @@
 
                 <p class="mt-4 text-dark-200 lead">{{ $song->description }}</p>
                 
-                <div class="mt-3">
+                <div class="mt-auto pt-5">
                     <button class="btn btn-accent btn-lg px-4 rounded-pill" onclick="playSong({{ $song->id }})">
                         <i class="bi bi-play-fill me-1"></i> Putar Sekarang
                     </button>

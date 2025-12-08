@@ -1,4 +1,5 @@
 <div id="music-player" class="fixed-bottom bg-dark-950 border-top border-dark-700 p-3 fade-in" style="z-index: 1050; transition: transform 0.3s ease;">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="container-xxl d-flex align-items-center justify-content-between">
         <!-- Song Info -->
         <div class="d-flex align-items-center gap-3" style="width: 30%;">
@@ -39,7 +40,7 @@
 
 <script>
     // Global Playlist Data
-    const playlist = @json($globalSongs ?? []);
+    let playlist = @json($globalSongs ?? []);
     let currentIndex = -1;
     const audio = document.getElementById('global-audio');
     const playBtn = document.getElementById('play-pause-btn');
@@ -50,6 +51,19 @@
     const currentTimeEl = document.getElementById('current-time');
     const durationEl = document.getElementById('duration');
 
+    // Function to set a custom playlist (scoping the queue)
+    function setQueue(newSongs) {
+        playlist = newSongs;
+        currentIndex = -1;
+    }
+
+    // Play a full playlist
+    function playPlaylist(songs) {
+        if (!songs || songs.length === 0) return;
+        setQueue(songs);
+        playSong(songs[0].id);
+    }
+
     // Function to load and play a song by ID or Index
     function playSong(id) {
         const index = playlist.findIndex(s => s.id == id);
@@ -58,7 +72,46 @@
             loadSong(playlist[currentIndex]);
             audio.play();
             updatePlayBtn(true);
+            recordPlay(playlist[currentIndex].id);
+        } else {
+            // If song is not in current playlist, likely from "Select a song" or search
+            // We might want to reset to global or add to queue? 
+            // For now, if passed ID is not in current scoped playlist, we fallback to global.
+            // User requested that clicking "Putar Playlist" scopes it.
+            // If user clicks "Play Now" on a song detail, it typically plays THAT song.
+            // If that song is not in the "playlist", what happens?
+            // To be safe: if song not found, we temporarily play it as single or switch to global.
+            // Let's reload global if not found, assuming "Play Now" means global context or single context.
+            // But for efficiency, let's just assume playSong is called with a visible song.
+            // If we are on Song Detail, we might want to ensure it plays.
+            // Let's fallback to global if not found.
+            const global = @json($globalSongs ?? []);
+            const globalIndex = global.findIndex(s => s.id == id);
+            if (globalIndex !== -1) {
+                playlist = global; // Reset to global
+                currentIndex = globalIndex;
+                loadSong(playlist[currentIndex]);
+                audio.play();
+                updatePlayBtn(true);
+                recordPlay(playlist[currentIndex].id);
+            }
         }
+    }
+    
+    // Record Play History
+    function recordPlay(songId) {
+        // Prevent spamming history if same song logs multiple times? Backend handles logic?
+        // Backend creates if new, updates if exists.
+        // We only call this on explicit play start.
+        if (!songId) return;
+
+        fetch(`/songs/${songId}/record-play`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json'
+            }
+        }).catch(err => console.error('Error recording play:', err));
     }
 
     function loadSong(song) {
@@ -74,6 +127,11 @@
                 artist: song.artist,
                 artwork: [{ src: "{{ asset('') }}" + song.cover_path }]
             });
+            
+            navigator.mediaSession.setActionHandler('play', togglePlay);
+            navigator.mediaSession.setActionHandler('pause', togglePlay);
+            navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+            navigator.mediaSession.setActionHandler('nexttrack', nextSong);
         }
     }
 
@@ -102,6 +160,7 @@
             loadSong(playlist[currentIndex]);
             audio.play();
             updatePlayBtn(true);
+            recordPlay(playlist[currentIndex].id);
         }
     }
 
@@ -111,6 +170,7 @@
             loadSong(playlist[currentIndex]);
             audio.play();
             updatePlayBtn(true);
+            recordPlay(playlist[currentIndex].id);
         }
     }
 

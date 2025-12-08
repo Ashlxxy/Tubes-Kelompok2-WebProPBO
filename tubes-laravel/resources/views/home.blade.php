@@ -13,7 +13,7 @@
       </div>
       <div class="col-lg-5 fade-in" style="animation-delay: 0.2s;">
         @if(isset($latestSong) && $latestSong)
-        <div class="hero-card p-3 rounded-4 bg-dark-900 border border-dark-700 hover-scale" onclick="window.location.href='{{ route('songs.show', $latestSong->id) }}'" style="cursor: pointer;">
+        <a href="{{ route('songs.show', $latestSong->id) }}" class="hero-card p-3 rounded-4 bg-dark-900 border border-dark-700 hover-scale d-block text-decoration-none text-reset">
           <div class="ratio ratio-16x9 rounded-3 bg-dark-800 overflow-hidden">
               <img src="{{ asset($latestSong->cover_path) }}" alt="{{ $latestSong->title }}" class="w-100 h-100 object-fit-cover">
           </div>
@@ -22,7 +22,7 @@
             <h4 class="mt-2">{{ $latestSong->title }}</h4>
             <div class="text-dark-200">{{ $latestSong->artist }}</div>
           </div>
-        </div>
+        </a>
         @endif
       </div>
     </div>
@@ -37,7 +37,7 @@
       <div class="row g-3">
           @forelse($popularSongs as $song)
           <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-            <div class="card song p-2 h-100 hover-scale" onclick="window.location.href='{{ route('songs.show', $song->id) }}'">
+            <a href="{{ route('songs.show', $song->id) }}" class="card song p-2 h-100 hover-scale text-decoration-none text-reset d-block">
               <img src="{{ asset($song->cover_path) }}" class="cover w-100 mb-2 rounded" alt="{{ $song->title }}">
               <div class="d-flex flex-column">
                 <div class="fw-semibold text-truncate">{{ $song->title }}</div>
@@ -47,7 +47,7 @@
                   <span class="badge bg-accent-soft"><i class="bi bi-heart-fill"></i> {{ $song->likes }}</span>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
           @empty
           <div class="col-12 text-center text-dark-300 py-5">
@@ -95,38 +95,28 @@
       <div style="height: 120px;"></div>
     </section>
   </main>
-@endsection
 
-@push('scripts')
 <script>
     function toggleAllDescriptions() {
         const hiddenItems = document.querySelectorAll('.description-item.d-none');
         const btn = document.getElementById('view-all-descriptions-btn');
-        const allItems = document.querySelectorAll('.description-item');
         
-        // If there are hidden items, show them
         if (hiddenItems.length > 0) {
+            // Show all
             hiddenItems.forEach(item => {
                 item.classList.remove('d-none');
-                item.classList.add('d-block-toggled'); // Marker to know what was toggled
+                item.classList.add('d-block-forced'); // Marker class
             });
             btn.innerHTML = 'Sembunyikan <i class="bi bi-chevron-up"></i>';
         } else {
-            // Hide items that were toggled open
-            const toggledItems = document.querySelectorAll('.description-item.d-block-toggled');
-            if (toggledItems.length > 0) {
-                toggledItems.forEach(item => {
-                    item.classList.add('d-none');
-                    item.classList.remove('d-block-toggled');
-                });
-            } else {
-                 // Fallback: hide everything after index 5
-                 allItems.forEach((item, index) => {
-                     if (index >= 6) item.classList.add('d-none');
-                 });
-            }
+            // Hide those we forced open
+            const forcedItems = document.querySelectorAll('.description-item.d-block-forced');
+            forcedItems.forEach(item => {
+                item.classList.add('d-none');
+                item.classList.remove('d-block-forced');
+            });
             btn.innerHTML = 'Lihat Selengkapnya <i class="bi bi-chevron-down"></i>';
         }
     }
 </script>
-@endpush
+@endsection

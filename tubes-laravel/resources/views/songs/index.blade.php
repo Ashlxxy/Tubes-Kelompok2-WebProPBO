@@ -22,7 +22,7 @@
     <div class="row g-3">
         @forelse($songs as $song)
         <div class="col-6 col-sm-4 col-md-3 col-lg-2 fade-in">
-            <div class="card song p-2 h-100 hover-scale" onclick="window.location.href='{{ route('songs.show', $song->id) }}'">
+            <a href="{{ route('songs.show', $song->id) }}" class="card song p-2 h-100 hover-scale text-decoration-none text-reset d-block">
                 <img src="{{ asset($song->cover_path) }}" class="cover w-100 mb-2 rounded" alt="{{ $song->title }}">
                 <div class="d-flex flex-column">
                     <div class="fw-semibold text-truncate">{{ $song->title }}</div>
@@ -38,7 +38,7 @@
                         @endauth
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         @empty
         <div class="col-12 text-center text-dark-300 py-5">

@@ -13,31 +13,64 @@
         @forelse($playlists as $playlist)
         <div class="col-12">
             <div class="card-dark p-4 rounded-4 border-dark-700">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">{{ $playlist->name }}</h4>
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-dark-700 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-dark-800 rounded p-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="bi bi-music-note-list fs-2 text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">{{ $playlist->name }}</h4>
+                            <small class="text-dark-300">{{ $playlist->songs->count() }} Lagu</small>
+                        </div>
+                        <button class="btn btn-sm btn-link text-dark-300" data-bs-toggle="modal" data-bs-target="#editPlaylistModal{{ $playlist->id }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                    
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editPlaylistModal{{ $playlist->id }}"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePlaylistModal{{ $playlist->id }}"><i class="bi bi-trash"></i></button>
+                        @if($playlist->songs->count() > 0)
+                        <button class="btn btn-accent" onclick='playPlaylist(@json($playlist->songs))'>
+                            <i class="bi bi-play-fill"></i> Putar Playlist
+                        </button>
+                        @endif
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deletePlaylistModal{{ $playlist->id }}">
+                            <i class="bi bi-trash"></i> Hapus Playlist
+                        </button>
                     </div>
                 </div>
-                <div class="row g-3">
+
+                <div class="list-group list-group-flush rounded-3 overflow-hidden">
                     @forelse($playlist->songs as $song)
-                    <div class="col-6 col-md-3 col-lg-2">
-                        <div class="card song p-2 h-100 position-relative group-hover" style="cursor: pointer;" onclick="window.location.href='{{ route('songs.show', $song->id) }}'">
-                            <img src="{{ asset($song->cover_path) }}" class="cover w-100 mb-2 rounded" alt="{{ $song->title }}">
-                            <div class="fw-semibold text-truncate">{{ $song->title }}</div>
-                            <div class="small text-dark-300 text-truncate">{{ $song->artist }}</div>
-                            
-                            <form action="{{ route('playlists.update', $playlist->id) }}" method="POST" class="position-absolute top-0 end-0 m-1" onclick="event.stopPropagation()">
+                    <a href="{{ route('songs.show', $song->id) }}" class="list-group-item list-group-item-action bg-dark-900 border-dark-700 p-3 d-flex justify-content-between align-items-center group-hover container-action text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ asset($song->cover_path) }}" class="rounded object-fit-cover" width="48" height="48">
+                            <div>
+                                <div class="fw-medium text-white">{{ $song->title }}</div>
+                                <div class="small text-dark-300">{{ $song->artist }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center gap-2">
+                             <button class="btn btn-sm btn-outline-accent btn-icon rounded-circle" onclick="event.preventDefault(); event.stopPropagation(); playSong({{ $song->id }})">
+                                <i class="bi bi-play-fill text-xl"></i>
+                            </button>
+
+                            <form action="{{ route('playlists.update', $playlist->id) }}" method="POST" onclick="event.preventDefault(); event.stopPropagation(); this.submit();">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="remove_song_id" value="{{ $song->id }}">
-                                <button class="btn btn-sm btn-danger rounded-circle p-1" style="width:24px;height:24px;line-height:1;"><i class="bi bi-x"></i></button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger btn-icon rounded-circle" title="Hapus dari playlist">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                             </form>
                         </div>
-                    </div>
+                    </a>
                     @empty
-                    <div class="col-12 text-dark-300">Playlist ini masih kosong.</div>
+                    <div class="text-center py-5 text-dark-300 border border-dashed border-dark-700 rounded-3">
+                        <i class="bi bi-music-note-beamed fs-1 mb-3 d-block opacity-50"></i>
+                        <p class="mb-0">Playlist ini masih kosong.</p>
+                        <small>Tambahkan lagu dari halaman Detail Lagu.</small>
+                    </div>
                     @endforelse
                 </div>
             </div>
