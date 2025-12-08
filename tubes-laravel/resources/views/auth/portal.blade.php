@@ -146,12 +146,12 @@
                 <!-- Overlay Panels (Text & Buttons) -->
                 <div class="overlay-panel overlay-left">
                     <h2 class="fw-bold mb-3">Sudah punya akun?</h2>
-                    <p class="mb-4">Masuk kembali untuk mengakses playlist dan lagu favoritmu.</p>
+                    <p class="mb-4">Masuk kembali untuk mengakses playlist dan lagu favoritmu</p>
                     <button class="btn btn-outline-accent-white btn-lg SignInLink">Masuk di sini</button>
                 </div>
                 <div class="overlay-panel overlay-right">
                     <h2 class="fw-bold mb-3">Belum punya akun?</h2>
-                    <p class="mb-4">Daftar sekarang untuk mulai mendengarkan karya UKM Band.</p>
+                    <p class="mb-4">Daftar sekarang untuk mulai mendengarkan lagu-lagu UKM Band</p>
                     <button class="btn btn-outline-accent-white btn-lg SignUpLink">Daftar sekarang</button>
                 </div>
             </div>
