@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        try {
+            \Illuminate\Support\Facades\View::share('globalSongs', \App\Models\Song::latest()->get());
+        } catch (\Exception $e) {
+            // Ignored during migrations
+        }
     }
 }

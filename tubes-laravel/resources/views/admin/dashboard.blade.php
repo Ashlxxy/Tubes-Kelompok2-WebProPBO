@@ -36,32 +36,51 @@
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('admin.songs.edit', $song->id) }}" class="btn btn-outline-accent"><i class="bi bi-pencil"></i></a>
                                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSongModal{{ $song->id }}"><i class="bi bi-trash"></i></button>
-                            </div>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="{{ asset($song->cover_path) }}" class="rounded object-fit-cover" width="40" height="40">
+                        <div>
+                          <div class="fw-medium text-white">{{ $song->title }}</div>
+                          <div class="small text-dark-300">{{ $song->artist }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ $song->genre }}</td>
+                    <td>{{ $song->plays }}</td>
+                    <td>{{ $song->likes }}</td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <a href="{{ route('admin.songs.edit', $song->id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil-square"></i></a>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSongModal{{ $song->id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
 
-                            <!-- Delete Modal -->
-                            <div class="modal fade text-start" id="deleteSongModal{{ $song->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content card-dark">
-                                        <div class="modal-header border-dark-700">
-                                            <h5 class="modal-title">Hapus Lagu?</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body text-dark-200">
-                                            Apakah Anda yakin ingin menghapus lagu <strong>{{ $song->title }}</strong>?
-                                        </div>
-                                        <div class="modal-footer border-dark-700">
-                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                            <form action="{{ route('admin.songs.destroy', $song->id) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Hapus</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                      <!-- Delete Modal -->
+                      <div class="modal fade" id="deleteSongModal{{ $song->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content card-dark">
+                                <div class="modal-header border-dark-700">
+                                    <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Hapus Lagu?</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="mb-0 text-dark-200">Apakah Anda yakin ingin menghapus lagu <strong>"{{ $song->title }}"</strong> by <strong>{{ $song->artist }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+                                </div>
+                                <div class="modal-footer border-dark-700">
+                                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Batal</button>
+                                    <form action="{{ route('admin.songs.destroy', $song->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                                    </form>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                     @empty
                     <tr>
                         <td colspan="7" class="text-center py-4 text-dark-300">Belum ada lagu.</td>

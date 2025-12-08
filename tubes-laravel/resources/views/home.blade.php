@@ -59,16 +59,19 @@
 
     <section id="descriptions" class="mt-5 fade-in" style="animation-delay: 0.6s;">
       <h3 class="mb-4">Deskripsi Lagu</h3>
-      <div class="row g-4">
-          @forelse($popularSongs as $song)
-          <div class="col-md-6 col-lg-4">
+      <div class="row g-4" id="description-container">
+          @forelse($allSongs as $index => $song)
+          <div class="col-md-6 col-lg-4 description-item {{ $index >= 6 ? 'd-none' : '' }}">
             <div class="card song p-3 h-100">
               <div class="d-flex align-items-start gap-3">
                 <img src="{{ asset($song->cover_path) }}" width="96" height="96" class="rounded-3 object-fit-cover" alt="{{ $song->title }}">
                 <div class="flex-fill">
                   <div class="fw-semibold">{{ $song->title }}</div>
-                  <div class="small text-dark-300 mb-2">{{ $song->artist }}</div>
-                  <p class="small text-dark-200 mb-0">{{ $song->description }}</p>
+                  <div class="small text-dark-200 mb-2">{{ $song->artist }}</div>
+                  
+                  <div class="description-text">
+                      <p class="small text-dark-200 mb-0">{{ $song->description }}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -79,6 +82,51 @@
           </div>
           @endforelse
       </div>
+      
+      @if($allSongs->count() > 6)
+      <div class="text-center mt-4">
+          <button id="view-all-descriptions-btn" class="btn btn-outline-accent rounded-pill px-4" onclick="toggleAllDescriptions()">
+              Lihat Selengkapnya <i class="bi bi-chevron-down"></i>
+          </button>
+      </div>
+      @endif
+
+      <!-- Spacer to prevent content from being hidden behind the player -->
+      <div style="height: 120px;"></div>
     </section>
   </main>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleAllDescriptions() {
+        const hiddenItems = document.querySelectorAll('.description-item.d-none');
+        const btn = document.getElementById('view-all-descriptions-btn');
+        const allItems = document.querySelectorAll('.description-item');
+        
+        // If there are hidden items, show them
+        if (hiddenItems.length > 0) {
+            hiddenItems.forEach(item => {
+                item.classList.remove('d-none');
+                item.classList.add('d-block-toggled'); // Marker to know what was toggled
+            });
+            btn.innerHTML = 'Sembunyikan <i class="bi bi-chevron-up"></i>';
+        } else {
+            // Hide items that were toggled open
+            const toggledItems = document.querySelectorAll('.description-item.d-block-toggled');
+            if (toggledItems.length > 0) {
+                toggledItems.forEach(item => {
+                    item.classList.add('d-none');
+                    item.classList.remove('d-block-toggled');
+                });
+            } else {
+                 // Fallback: hide everything after index 5
+                 allItems.forEach((item, index) => {
+                     if (index >= 6) item.classList.add('d-none');
+                 });
+            }
+            btn.innerHTML = 'Lihat Selengkapnya <i class="bi bi-chevron-down"></i>';
+        }
+    }
+</script>
+@endpush

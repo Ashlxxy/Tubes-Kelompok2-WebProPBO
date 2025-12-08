@@ -35,13 +35,20 @@
                 </div>
 
                 <p class="mt-4 text-dark-200 lead">{{ $song->description }}</p>
+                
+                <div class="mt-3">
+                    <button class="btn btn-accent btn-lg px-4 rounded-pill" onclick="playSong({{ $song->id }})">
+                        <i class="bi bi-play-fill me-1"></i> Putar Sekarang
+                    </button>
+                </div>
 
-                <div class="mt-auto pt-4">
+                <!-- Hidden audio for fallback or if needed, but we use global player now -->
+                {{-- <div class="mt-auto pt-4">
                     <audio controls class="w-100 custom-audio">
                         <source src="{{ route('songs.stream', $song->id) }}" type="audio/mpeg">
                         Browser Anda tidak mendukung elemen audio.
                     </audio>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
@@ -118,6 +125,9 @@
         </div>
     </div>
 </div>
+
+<!-- Spacer to prevent content from being hidden behind the player -->
+<div style="height: 120px;"></div>
 
 <!-- Playlist Modal -->
 @auth

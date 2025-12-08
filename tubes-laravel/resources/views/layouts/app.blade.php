@@ -43,11 +43,9 @@
     @yield('content')
   </main>
 
-  <footer class="py-4 bg-dark-900 text-center text-dark-200 mt-auto border-top border-dark-700">
-    <div class="container small">
-      © UKM Band Universitas Telkom
-    </div>
-  </footer>
+
+
+  @include('partials.player')
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   @stack('scripts')
 </body>

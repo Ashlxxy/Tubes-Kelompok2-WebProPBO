@@ -11,7 +11,8 @@ class HomeController extends Controller
     {
         $latestSong = Song::latest()->first();
         $popularSongs = Song::orderByRaw('plays + likes DESC')->take(6)->get();
+        $allSongs = Song::latest()->get();
         
-        return view('home', compact('latestSong', 'popularSongs'));
+        return view('home', compact('latestSong', 'popularSongs', 'allSongs'));
     }
 }
