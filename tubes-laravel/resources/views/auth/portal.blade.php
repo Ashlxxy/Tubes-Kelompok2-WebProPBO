@@ -45,7 +45,7 @@
             <div class="w-100">
                 <div class="text-center mb-4">
                     <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="50" class="mb-2 rounded-circle">
-                    <h2 class="fw-bold">Selamat Datang Kembali</h2>
+                    <h2 class="fw-bold text-accent">Selamat Datang Kembali</h2>
                     <p class="text-dark-300 small">Masuk untuk menikmati playlist kamu</p>
                 </div>
                 <form action="{{ route('login') }}" method="POST">
@@ -78,7 +78,7 @@
             <div class="w-100">
                 <div class="text-center mb-4">
                     <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="50" class="mb-2 rounded-circle">
-                    <h2 class="fw-bold">Selamat Datang</h2>
+                    <h2 class="fw-bold text-accent">Selamat Datang</h2>
                     <p class="text-dark-300 small">Daftar untuk mendengarkan lagu favorit kamu</p>
                 </div>
                 <form action="{{ route('register') }}" method="POST">
@@ -147,12 +147,12 @@
                 <div class="overlay-panel overlay-left">
                     <h2 class="fw-bold mb-3">Sudah punya akun?</h2>
                     <p class="mb-4">Masuk kembali untuk mengakses playlist dan lagu favoritmu.</p>
-                    <button class="btn btn-outline-light btn-lg SignInLink">Masuk di sini</button>
+                    <button class="btn btn-outline-accent-white btn-lg SignInLink">Masuk di sini</button>
                 </div>
                 <div class="overlay-panel overlay-right">
                     <h2 class="fw-bold mb-3">Belum punya akun?</h2>
                     <p class="mb-4">Daftar sekarang untuk mulai mendengarkan karya UKM Band.</p>
-                    <button class="btn btn-outline-light btn-lg SignUpLink">Daftar sekarang</button>
+                    <button class="btn btn-outline-accent-white btn-lg SignUpLink">Daftar sekarang</button>
                 </div>
             </div>
         </div>
