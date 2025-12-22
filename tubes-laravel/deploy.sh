@@ -75,6 +75,10 @@ apt install -y php$PHP_VERSION \
     php$PHP_VERSION-readline \
     php$PHP_VERSION-opcache
 
+# Set PHP 8.4 as default CLI
+update-alternatives --set php /usr/bin/php$PHP_VERSION 2>/dev/null || true
+update-alternatives --set phar /usr/bin/phar$PHP_VERSION 2>/dev/null || true
+
 # Start PHP-FPM
 systemctl enable php$PHP_VERSION-fpm
 systemctl start php$PHP_VERSION-fpm
