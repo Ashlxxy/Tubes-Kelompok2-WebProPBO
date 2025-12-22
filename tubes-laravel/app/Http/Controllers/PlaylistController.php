@@ -36,18 +36,31 @@ class PlaylistController extends Controller
         if ($playlist->user_id !== Auth::id()) abort(403);
         
         if ($request->has('song_id')) {
-            if ($playlist->songs()->where('song_id', $request->song_id)->exists()) {
-                if ($request->wantsJson()) {
-                    return response()->json(['success' => false, 'message' => 'Lagu sudah ada di playlist.']);
-                }
-                return back()->with('error', 'Lagu sudah ada di playlist.');
-            }
-            $playlist->songs()->attach($request->song_id);
+            $songExists = $playlist->songs()->where('song_id', $request->song_id)->exists();
             
-            if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Lagu berhasil ditambahkan ke playlist.']);
+            if ($songExists) {
+                // Song exists - remove it
+                $playlist->songs()->detach($request->song_id);
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => true, 
+                        'action' => 'removed',
+                        'message' => 'Lagu dihapus dari playlist.'
+                    ]);
+                }
+                return back()->with('success', 'Lagu dihapus dari playlist.');
+            } else {
+                // Song doesn't exist - add it
+                $playlist->songs()->attach($request->song_id);
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => true, 
+                        'action' => 'added',
+                        'message' => 'Lagu berhasil ditambahkan ke playlist.'
+                    ]);
+                }
+                return back()->with('success', 'Lagu berhasil ditambahkan ke playlist.');
             }
-            return back()->with('success', 'Lagu berhasil ditambahkan ke playlist.');
         }
         
         if ($request->has('remove_song_id')) {

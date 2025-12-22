@@ -156,6 +156,32 @@
                     .catch(error => console.error('Error:', error));
                 }
 
+                function showToast(message, isSuccess = true) {
+                    // Remove existing toast if any
+                    const existingToast = document.getElementById('dynamic-toast');
+                    if (existingToast) existingToast.remove();
+
+                    const toastHtml = `
+                        <div id="dynamic-toast" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+                            <div class="toast show align-items-center text-white ${isSuccess ? 'bg-success' : 'bg-danger'} border-0" role="alert">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <i class="bi ${isSuccess ? 'bi-check-circle' : 'bi-x-circle'} me-2"></i>${message}
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('#dynamic-toast').remove()"></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', toastHtml);
+                    
+                    // Auto-remove after 3 seconds
+                    setTimeout(() => {
+                        const toast = document.getElementById('dynamic-toast');
+                        if (toast) toast.remove();
+                    }, 3000);
+                }
+
                 function handlePlaylistSubmit(event, playlistId) {
                     event.preventDefault();
                     const form = event.target;
@@ -172,16 +198,23 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                             // Update UI to show 'Added'
-                             const badge = btn.querySelector('.badge');
-                             badge.className = 'badge bg-success';
-                             badge.innerHTML = '<i class="bi bi-check"></i> Sudah Ada';
-                             // Optional: Show toast
+                            const badge = btn.querySelector('.badge');
+                            if (data.action === 'added') {
+                                badge.className = 'badge bg-success';
+                                badge.innerHTML = '<i class="bi bi-check"></i> Sudah Ada';
+                            } else if (data.action === 'removed') {
+                                badge.className = 'badge bg-dark-700';
+                                badge.innerHTML = '<i class="bi bi-plus"></i> Tambah';
+                            }
+                            showToast(data.message, true);
                         } else {
-                            alert(data.message);
+                            showToast(data.message, false);
                         }
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Terjadi kesalahan.', false);
+                    });
                 }
 
                 function handleCreatePlaylist(event) {
@@ -224,14 +257,17 @@
                              
                              // Reset form
                              form.reset();
-
-                             // If we have a song_id hidden input in create form (we should add it), we can auto-add?
-                             // User flow: Create playlist -> It appears -> User clicks add.
-                             // Or better: Create playlist also adds current song?
-                             // Current implementation just creates.
+                             
+                             // Show toast
+                             showToast(data.message, true);
+                        } else {
+                            showToast(data.message || 'Gagal membuat playlist.', false);
                         }
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Terjadi kesalahan.', false);
+                    });
                 }
             </script>
         </div>
