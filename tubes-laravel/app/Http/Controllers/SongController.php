@@ -67,6 +67,15 @@ class SongController extends Controller
             $status = 'liked';
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => $status,
+                'likes' => $song->likes,
+                'message' => $status === 'liked' ? 'Disukai!' : 'Batal menyukai!'
+            ]);
+        }
+
         return back()->with('success', $status === 'liked' ? 'Disukai!' : 'Batal menyukai!');
     }
 

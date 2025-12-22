@@ -16,16 +16,16 @@
                         <h4 class="text-accent mb-0">{{ $song->artist }}</h4>
                     </div>
                     <div class="d-flex gap-2">
-                        <form action="{{ route('songs.like', $song->id) }}" method="POST">
+                        <form id="like-form-{{ $song->id }}" action="{{ route('songs.like', $song->id) }}" method="POST" onsubmit="handleLike(event, {{ $song->id }})">
                             @csrf
                             @auth
                                 @if(Auth::user()->likedSongs->contains($song->id))
-                                    <button class="btn btn-accent btn-lg"><i class="bi bi-heart-fill"></i> {{ $song->likes }}</button>
+                                    <button type="submit" class="btn btn-accent btn-lg" id="like-btn-{{ $song->id }}"><i class="bi bi-heart-fill"></i> <span id="like-count-{{ $song->id }}">{{ $song->likes }}</span></button>
                                 @else
-                                    <button class="btn btn-outline-accent btn-lg"><i class="bi bi-heart"></i> {{ $song->likes }}</button>
+                                    <button type="submit" class="btn btn-outline-accent btn-lg" id="like-btn-{{ $song->id }}"><i class="bi bi-heart"></i> <span id="like-count-{{ $song->id }}">{{ $song->likes }}</span></button>
                                 @endif
                             @else
-                                <button class="btn btn-outline-accent btn-lg"><i class="bi bi-heart"></i> {{ $song->likes }}</button>
+                                <a href="{{ route('login') }}" class="btn btn-outline-accent btn-lg"><i class="bi bi-heart"></i> {{ $song->likes }}</a>
                             @endauth
                         </form>
                         @auth
@@ -67,7 +67,9 @@
                 </div>
             </form>
             @else
-            <div class="alert alert-dark mb-4">Silakan login untuk menulis komentar.</div>
+            <div class="alert alert-dark mb-4">
+                Silakan <a href="{{ route('login') }}" class="link-accent">Login</a> atau <a href="{{ route('register') }}" class="link-accent">Register</a> untuk menulis komentar.
+            </div>
             @endauth
 
             <div class="list-group list-group-flush rounded-3 overflow-hidden" id="commentList">
@@ -120,6 +122,38 @@
                 function toggleReplyForm(commentId) {
                     const form = document.getElementById(`replyForm-${commentId}`);
                     form.classList.toggle('d-none');
+                }
+
+                function handleLike(event, songId) {
+                    event.preventDefault();
+                    const form = document.getElementById(`like-form-${songId}`);
+                    const btn = document.getElementById(`like-btn-${songId}`);
+                    const countSpan = document.getElementById(`like-count-${songId}`);
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            countSpan.innerText = data.likes;
+                            if (data.status === 'liked') {
+                                btn.classList.remove('btn-outline-accent');
+                                btn.classList.add('btn-accent');
+                                btn.innerHTML = `<i class="bi bi-heart-fill"></i> <span id="like-count-${songId}">${data.likes}</span>`;
+                            } else {
+                                btn.classList.remove('btn-accent');
+                                btn.classList.add('btn-outline-accent');
+                                btn.innerHTML = `<i class="bi bi-heart"></i> <span id="like-count-${songId}">${data.likes}</span>`;
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
                 }
             </script>
         </div>

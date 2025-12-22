@@ -13,11 +13,17 @@
         <!-- Controls -->
         <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 mx-3" style="max-width: 500px;">
             <div class="d-flex align-items-center gap-3 mb-2">
+                <button class="btn btn-sm btn-link text-dark-300 hover-text-white" id="shuffle-btn" onclick="toggleShuffle()" title="Shuffle">
+                    <i class="bi bi-shuffle"></i>
+                </button>
                 <button class="btn btn-sm btn-link text-dark-300 hover-text-white" onclick="prevSong()"><i class="bi bi-skip-start-fill fs-4"></i></button>
                 <button id="play-pause-btn" class="btn btn-accent rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" onclick="togglePlay()">
                     <i class="bi bi-play-fill fs-4 ms-1"></i>
                 </button>
                 <button class="btn btn-sm btn-link text-dark-300 hover-text-white" onclick="nextSong()"><i class="bi bi-skip-end-fill fs-4"></i></button>
+                <button class="btn btn-sm btn-link text-dark-300 hover-text-white" id="repeat-btn" onclick="toggleRepeat()" title="Repeat">
+                    <i class="bi bi-repeat"></i>
+                </button>
             </div>
             <div class="w-100 d-flex align-items-center gap-2">
                 <span id="current-time" class="small text-dark-300" style="font-size: 10px; min-width: 35px;">0:00</span>
@@ -29,7 +35,9 @@
         <!-- Volume & Extras -->
         <div class="d-flex align-items-center justify-content-end gap-3" style="width: 30%;">
            <div class="d-flex align-items-center gap-2" style="width: 120px;">
-                <i class="bi bi-volume-up text-dark-300"></i>
+                <button class="btn btn-sm btn-link text-dark-300 hover-text-white p-0" onclick="toggleMute()" id="mute-btn">
+                    <i class="bi bi-volume-up"></i>
+                </button>
                 <input type="range" id="volume-bar" class="form-range" min="0" max="1" step="0.1" value="1" onchange="setVolume()">
             </div>
         </div>
@@ -42,6 +50,10 @@
     // Global Playlist Data
     let playlist = @json($globalSongs ?? []);
     let currentIndex = -1;
+    let isShuffle = false;
+    let isRepeat = false;
+    let previousVolume = 1;
+
     const audio = document.getElementById('global-audio');
     const playBtn = document.getElementById('play-pause-btn');
     const cover = document.getElementById('player-cover');
@@ -50,6 +62,10 @@
     const seekBar = document.getElementById('seek-bar');
     const currentTimeEl = document.getElementById('current-time');
     const durationEl = document.getElementById('duration');
+    const shuffleBtn = document.getElementById('shuffle-btn');
+    const repeatBtn = document.getElementById('repeat-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const volumeBar = document.getElementById('volume-bar');
 
     // Function to set a custom playlist (scoping the queue)
     function setQueue(newSongs) {
@@ -157,20 +173,66 @@
     function prevSong() {
         if (currentIndex > 0) {
             currentIndex--;
-            loadSong(playlist[currentIndex]);
-            audio.play();
-            updatePlayBtn(true);
-            recordPlay(playlist[currentIndex].id);
+        } else if (isRepeat) {
+             currentIndex = playlist.length - 1; // Wrap around if repeat is on
+        } else {
+            return; // Start of playlist
         }
+        
+        loadSong(playlist[currentIndex]);
+        audio.play();
+        updatePlayBtn(true);
+        recordPlay(playlist[currentIndex].id);
     }
 
     function nextSong() {
-        if (currentIndex < playlist.length - 1) {
-            currentIndex++;
-            loadSong(playlist[currentIndex]);
-            audio.play();
-            updatePlayBtn(true);
-            recordPlay(playlist[currentIndex].id);
+        if (isShuffle) {
+            let nextIndex = Math.floor(Math.random() * playlist.length);
+            // Avoid repeating same song if possible, unless only 1 song
+            if (playlist.length > 1 && nextIndex === currentIndex) {
+                nextIndex = (nextIndex + 1) % playlist.length;
+            }
+            currentIndex = nextIndex;
+        } else {
+            if (currentIndex < playlist.length - 1) {
+                currentIndex++;
+            } else if (isRepeat) {
+                currentIndex = 0; // Wrap around
+            } else {
+                return; // End of playlist
+            }
+        }
+
+        loadSong(playlist[currentIndex]);
+        audio.play();
+        updatePlayBtn(true);
+        recordPlay(playlist[currentIndex].id);
+    }
+
+    function toggleShuffle() {
+        isShuffle = !isShuffle;
+        shuffleBtn.classList.toggle('text-accent', isShuffle);
+        shuffleBtn.classList.toggle('text-dark-300', !isShuffle);
+    }
+
+    function toggleRepeat() {
+        isRepeat = !isRepeat;
+        repeatBtn.classList.toggle('text-accent', isRepeat);
+        repeatBtn.classList.toggle('text-dark-300', !isRepeat);
+    }
+
+    function toggleMute() {
+        if (audio.muted) {
+            audio.muted = false;
+            volumeBar.value = previousVolume;
+            muteBtn.innerHTML = '<i class="bi bi-volume-up"></i>';
+            audio.volume = previousVolume; // Ensure volume is restored
+        } else {
+            previousVolume = volumeBar.value;
+            audio.muted = true;
+            volumeBar.value = 0;
+            muteBtn.innerHTML = '<i class="bi bi-volume-mute"></i>';
+            audio.volume = 0; // Ensure volume is set to 0
         }
     }
 
@@ -183,7 +245,16 @@
     }
 
     function setVolume() {
-        audio.volume = document.getElementById('volume-bar').value;
+        audio.volume = volumeBar.value;
+        if (audio.volume > 0 && audio.muted) {
+            audio.muted = false;
+             muteBtn.innerHTML = '<i class="bi bi-volume-up"></i>';
+        } else if (audio.volume == 0) {
+            audio.muted = true;
+            muteBtn.innerHTML = '<i class="bi bi-volume-mute"></i>';
+        } else if (audio.volume > 0 && !audio.muted) {
+            muteBtn.innerHTML = '<i class="bi bi-volume-up"></i>';
+        }
     }
 
     // Audio Event Listeners
