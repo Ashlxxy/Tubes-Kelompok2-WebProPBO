@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================================
-# UKM Band Laravel Deployment Script
+# UKM Band Laravel Deployment Script (Caddy Version)
 # Domain: ukm-band.cyshe.my.id
 # Run as root: sudo bash deploy.sh
 # ============================================================
@@ -17,7 +17,7 @@ DB_PASSWORD="$(openssl rand -base64 16)"
 APP_KEY=""  # Will be generated
 GITHUB_REPO="https://github.com/Ashlxxy/Tubes-Kelompok2-WebProPBO.git"
 PHP_VERSION="8.4"
-EMAIL="admin@cyshe.my.id"  # For SSL certificate
+CADDYFILE="/root/Caddyfile"
 
 # Colors for output
 RED='\033[0;31m'
@@ -30,7 +30,7 @@ print_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
 print_error() { echo -e "${RED}[✗]${NC} $1"; }
 
 echo "============================================================"
-echo "  UKM Band Laravel Deployment Script"
+echo "  UKM Band Laravel Deployment Script (Caddy)"
 echo "  Domain: $DOMAIN"
 echo "============================================================"
 echo ""
@@ -75,24 +75,24 @@ apt install -y php$PHP_VERSION \
     php$PHP_VERSION-readline \
     php$PHP_VERSION-opcache
 
-# ============================================================
-# 4. INSTALL NGINX
-# ============================================================
-print_status "Installing Nginx..."
-apt install -y nginx
-systemctl enable nginx
-systemctl start nginx
+# Start PHP-FPM
+systemctl enable php$PHP_VERSION-fpm
+systemctl start php$PHP_VERSION-fpm
 
 # ============================================================
-# 5. INSTALL MYSQL
+# 4. INSTALL MYSQL (if not already installed)
 # ============================================================
-print_status "Installing MySQL Server..."
-apt install -y mysql-server
-systemctl enable mysql
-systemctl start mysql
+if ! command -v mysql &> /dev/null; then
+    print_status "Installing MySQL Server..."
+    apt install -y mysql-server
+    systemctl enable mysql
+    systemctl start mysql
+else
+    print_status "MySQL already installed, skipping..."
+fi
 
 # ============================================================
-# 6. CREATE DATABASE AND USER
+# 5. CREATE DATABASE AND USER
 # ============================================================
 print_status "Creating database and user..."
 mysql -e "CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -103,30 +103,39 @@ mysql -e "FLUSH PRIVILEGES;"
 print_status "Database '$DB_NAME' created with user '$DB_USER'"
 
 # ============================================================
-# 7. INSTALL PHPMYADMIN
+# 6. INSTALL PHPMYADMIN
 # ============================================================
-print_status "Installing phpMyAdmin..."
-DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin
-
-# Configure phpMyAdmin with Nginx
-ln -sf /usr/share/phpmyadmin /var/www/html/phpmyadmin
-
-# ============================================================
-# 8. INSTALL COMPOSER
-# ============================================================
-print_status "Installing Composer..."
-curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-chmod +x /usr/local/bin/composer
+if [ ! -d "/usr/share/phpmyadmin" ]; then
+    print_status "Installing phpMyAdmin..."
+    DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin
+else
+    print_status "phpMyAdmin already installed, skipping..."
+fi
 
 # ============================================================
-# 9. INSTALL NODE.JS (for frontend assets)
+# 7. INSTALL COMPOSER
 # ============================================================
-print_status "Installing Node.js..."
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
+if ! command -v composer &> /dev/null; then
+    print_status "Installing Composer..."
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    chmod +x /usr/local/bin/composer
+else
+    print_status "Composer already installed, skipping..."
+fi
 
 # ============================================================
-# 10. CLONE REPOSITORY
+# 8. INSTALL NODE.JS (for frontend assets)
+# ============================================================
+if ! command -v node &> /dev/null; then
+    print_status "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt install -y nodejs
+else
+    print_status "Node.js already installed, skipping..."
+fi
+
+# ============================================================
+# 9. CLONE REPOSITORY
 # ============================================================
 print_status "Cloning repository..."
 rm -rf $APP_DIR
@@ -137,20 +146,19 @@ mv $APP_DIR/temp/tubes-laravel/.* $APP_DIR/ 2>/dev/null || true
 rm -rf $APP_DIR/temp
 
 # ============================================================
-# 11. INSTALL LARAVEL DEPENDENCIES
+# 10. INSTALL LARAVEL DEPENDENCIES
 # ============================================================
 print_status "Installing Laravel dependencies..."
 cd $APP_DIR
-composer install --no-interaction --optimize-autoloader --no-dev
+COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --optimize-autoloader --no-dev
 
 # ============================================================
-# 12. CONFIGURE ENVIRONMENT
+# 11. CONFIGURE ENVIRONMENT
 # ============================================================
 print_status "Configuring environment..."
-cp .env.example .env 2>/dev/null || touch .env
 
 # Generate .env file
-cat > .env << EOF
+cat > $APP_DIR/.env << EOF
 APP_NAME="UKM Band"
 APP_ENV=production
 APP_KEY=
@@ -204,19 +212,24 @@ MAIL_FROM_NAME="\${APP_NAME}"
 EOF
 
 # Generate application key
+cd $APP_DIR
 php artisan key:generate --force
 
 # ============================================================
-# 13. SET PERMISSIONS
+# 12. SET PERMISSIONS
 # ============================================================
 print_status "Setting permissions..."
 chown -R www-data:www-data $APP_DIR
 chmod -R 755 $APP_DIR
 chmod -R 775 $APP_DIR/storage $APP_DIR/bootstrap/cache
-chmod -R 775 $APP_DIR/public/uploads 2>/dev/null || mkdir -p $APP_DIR/public/uploads && chmod -R 775 $APP_DIR/public/uploads
+mkdir -p $APP_DIR/public/uploads
+chmod -R 775 $APP_DIR/public/uploads
+mkdir -p $APP_DIR/public/assets/audio
+chmod -R 775 $APP_DIR/public/assets
+chown -R www-data:www-data $APP_DIR/public
 
 # ============================================================
-# 14. RUN MIGRATIONS
+# 13. RUN MIGRATIONS
 # ============================================================
 print_status "Running database migrations..."
 cd $APP_DIR
@@ -224,7 +237,7 @@ php artisan migrate --force
 php artisan db:seed --force 2>/dev/null || true
 
 # ============================================================
-# 15. OPTIMIZE LARAVEL
+# 14. OPTIMIZE LARAVEL
 # ============================================================
 print_status "Optimizing Laravel..."
 php artisan config:cache
@@ -233,108 +246,76 @@ php artisan view:cache
 php artisan storage:link
 
 # ============================================================
-# 16. CONFIGURE NGINX
+# 15. CONFIGURE CADDY
 # ============================================================
-print_status "Configuring Nginx..."
+print_status "Configuring Caddy..."
 
-cat > /etc/nginx/sites-available/$DOMAIN << 'NGINX_CONF'
-server {
-    listen 80;
-    listen [::]:80;
-    server_name DOMAIN_PLACEHOLDER;
-    root /var/www/ukm-band/public;
+# Backup existing Caddyfile
+cp $CADDYFILE ${CADDYFILE}.backup 2>/dev/null || true
 
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
+# Create phpMyAdmin symlink
+mkdir -p /var/www/phpmyadmin
+ln -sf /usr/share/phpmyadmin /var/www/phpmyadmin/public 2>/dev/null || true
 
-    index index.php index.html;
+# Append new site to Caddyfile
+cat >> $CADDYFILE << 'CADDY_CONF'
 
-    charset utf-8;
-
-    # Increase max upload size
-    client_max_body_size 100M;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/phpPHP_VERSION_PLACEHOLDER-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_hide_header X-Powered-By;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-
-    # Audio file handling with proper Range support
-    location ~* \.(mp3|wav|ogg|m4a)$ {
-        add_header Accept-Ranges bytes;
-        add_header Cache-Control "public, max-age=31536000";
+# UKM Band Laravel Application
+ukm-band.cyshe.my.id {
+    root * /var/www/ukm-band/public
+    
+    # Enable file server
+    file_server
+    
+    # PHP-FPM
+    php_fastcgi unix//run/php/php8.4-fpm.sock
+    
+    # Encode responses
+    encode gzip zstd
+    
+    # Handle Laravel routing
+    try_files {path} {path}/ /index.php?{query}
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        -Server
     }
     
-    # phpMyAdmin
-    location /phpmyadmin {
-        alias /usr/share/phpmyadmin;
-        index index.php;
-        
-        location ~ ^/phpmyadmin/(.+\.php)$ {
-            alias /usr/share/phpmyadmin/$1;
-            fastcgi_pass unix:/var/run/php/phpPHP_VERSION_PLACEHOLDER-fpm.sock;
-            fastcgi_param SCRIPT_FILENAME $request_filename;
-            include fastcgi_params;
-        }
+    # Logging
+    log {
+        output file /var/log/caddy/ukm-band.log
+    }
+    
+    # Handle phpMyAdmin at /phpmyadmin
+    handle_path /phpmyadmin* {
+        root * /usr/share/phpmyadmin
+        php_fastcgi unix//run/php/php8.4-fpm.sock
+        file_server
     }
 }
-NGINX_CONF
+CADDY_CONF
 
-# Replace placeholders
-sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" /etc/nginx/sites-available/$DOMAIN
-sed -i "s/PHP_VERSION_PLACEHOLDER/$PHP_VERSION/g" /etc/nginx/sites-available/$DOMAIN
+# Create log directory
+mkdir -p /var/log/caddy
+chown caddy:caddy /var/log/caddy
 
-# Enable site
-ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-
-# Test and reload Nginx
-nginx -t && systemctl reload nginx
+# Reload Caddy
+print_status "Reloading Caddy..."
+systemctl reload caddy || caddy reload --config $CADDYFILE
 
 # ============================================================
-# 17. INSTALL SSL CERTIFICATE
-# ============================================================
-print_status "Installing Certbot and obtaining SSL certificate..."
-apt install -y certbot python3-certbot-nginx
-
-print_warning "Obtaining SSL certificate for $DOMAIN..."
-print_warning "Make sure your DNS is pointing to this server before proceeding!"
-echo ""
-read -p "Is your DNS configured and pointing to this server? (y/n): " dns_ready
-
-if [ "$dns_ready" = "y" ] || [ "$dns_ready" = "Y" ]; then
-    certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL --redirect
-    print_status "SSL certificate installed successfully!"
-else
-    print_warning "Skipping SSL installation. Run this command later:"
-    echo "sudo certbot --nginx -d $DOMAIN --redirect"
-fi
-
-# ============================================================
-# 18. CONFIGURE FIREWALL
+# 16. CONFIGURE FIREWALL
 # ============================================================
 print_status "Configuring firewall..."
-ufw allow 'Nginx Full'
+ufw allow 80/tcp
+ufw allow 443/tcp
 ufw allow OpenSSH
-echo "y" | ufw enable
+echo "y" | ufw enable 2>/dev/null || true
 
 # ============================================================
-# 19. CREATE SYSTEMD SERVICE FOR QUEUE WORKER (optional)
+# 17. CREATE SYSTEMD SERVICE FOR QUEUE WORKER
 # ============================================================
 print_status "Creating queue worker service..."
 cat > /etc/systemd/system/ukm-band-queue.service << EOF
@@ -395,3 +376,5 @@ App Directory: $APP_DIR
 EOF
 
 print_status "Credentials saved to /root/ukm-band-credentials.txt"
+print_status "Caddy will automatically obtain SSL certificate for $DOMAIN"
+print_warning "Make sure your DNS is pointing to this server!"
