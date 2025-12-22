@@ -147,7 +147,7 @@
         const index = playlist.findIndex(s => s.id == id);
         if (index !== -1) {
             currentIndex = index;
-            loadSongWithBlob(playlist[currentIndex]);
+            loadSong(playlist[currentIndex]);
             recordPlay(playlist[currentIndex].id);
         } else {
             const global = @json($globalSongs ?? []);
@@ -155,14 +155,14 @@
             if (globalIndex !== -1) {
                 playlist = global;
                 currentIndex = globalIndex;
-                loadSongWithBlob(playlist[currentIndex]);
+                loadSong(playlist[currentIndex]);
                 recordPlay(playlist[currentIndex].id);
             }
         }
     }
 
-    // Load song as blob to enable seeking without Range requests
-    async function loadSongWithBlob(song) {
+    // Load song directly (Streaming)
+    function loadSong(song) {
         // Update UI immediately
         title.innerText = song.title;
         artist.innerText = song.artist;
@@ -170,53 +170,30 @@
         
         // Reset state
         isAudioReady = false;
-        seekBar.disabled = true;
-        seekBar.value = 0;
-        currentTimeEl.innerText = "0:00";
-        durationEl.innerText = "Loading...";
         loadingStatus.classList.remove('d-none');
-        updateSeekGradient();
+        durationEl.innerText = "Loading...";
+        
+        // Set audio source directly to allow streaming
+        audio.src = "{{ asset('') }}" + song.file_path;
+        audio.load();
 
-        // Clean up previous blob URL
-        if (currentBlobUrl) {
-            URL.revokeObjectURL(currentBlobUrl);
-            currentBlobUrl = null;
-        }
+        // Wait for metadata to load
+        audio.addEventListener('loadedmetadata', function onMeta() {
+            isAudioReady = true;
+            seekBar.disabled = false;
+            seekBar.max = audio.duration;
+            durationEl.innerText = formatTime(audio.duration);
+            loadingStatus.classList.add('d-none');
+            updateSeekGradient();
+            attemptPlay();
+        }, { once: true });
 
-        try {
-            // Fetch entire audio file
-            const response = await fetch("{{ asset('') }}" + song.file_path);
-            if (!response.ok) throw new Error('Failed to fetch audio');
-            
-            const blob = await response.blob();
-            currentBlobUrl = URL.createObjectURL(blob);
-            
-            // Set the blob URL as audio source
-            audio.src = currentBlobUrl;
-            
-            // Wait for metadata to load before playing
-            audio.addEventListener('loadedmetadata', function onMeta() {
-                audio.removeEventListener('loadedmetadata', onMeta);
-                isAudioReady = true;
-                seekBar.disabled = false;
-                seekBar.max = audio.duration;
-                durationEl.innerText = formatTime(audio.duration);
-                loadingStatus.classList.add('d-none');
-                updateSeekGradient();
-                attemptPlay();
-            }, { once: true });
-
-            // Handle errors
-            audio.addEventListener('error', function onError() {
-                audio.removeEventListener('error', onError);
-                console.error('Audio load error');
-                loadingStatus.innerText = 'Error';
-            }, { once: true });
-
-        } catch (error) {
-            console.error('Error loading audio:', error);
+        // Handle errors
+        audio.addEventListener('error', function onError(e) {
+            console.error('Audio load error', e);
             loadingStatus.innerText = 'Error';
-        }
+            loadingStatus.classList.remove('d-none');
+        }, { once: true });
 
         // Set up media session
         if ('mediaSession' in navigator) {
@@ -283,7 +260,7 @@
         } else {
             return; 
         }
-        loadSongWithBlob(playlist[currentIndex]);
+        loadSong(playlist[currentIndex]);
         recordPlay(playlist[currentIndex].id);
     }
 
@@ -303,7 +280,7 @@
                 return; 
             }
         }
-        loadSongWithBlob(playlist[currentIndex]);
+        loadSong(playlist[currentIndex]);
         recordPlay(playlist[currentIndex].id);
     }
 
