@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark-900 sticky-top border-bottom border-dark-700">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark-900 fixed-top border-bottom border-dark-700">
     <div class="container-fluid px-3">
       <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="{{ route('home') }}">
         <img src="{{ asset('assets/img/logo.png') }}" alt="Logo UKM Band" width="40" height="40" class="rounded-circle">

@@ -155,6 +155,84 @@
                     })
                     .catch(error => console.error('Error:', error));
                 }
+
+                function handlePlaylistSubmit(event, playlistId) {
+                    event.preventDefault();
+                    const form = event.target;
+                    const btn = document.getElementById(`playlist-btn-${playlistId}`);
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                             // Update UI to show 'Added'
+                             const badge = btn.querySelector('.badge');
+                             badge.className = 'badge bg-success';
+                             badge.innerHTML = '<i class="bi bi-check"></i> Sudah Ada';
+                             // Optional: Show toast
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+
+                function handleCreatePlaylist(event) {
+                    event.preventDefault();
+                    const form = event.target;
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.playlist) {
+                             // Add new playlist to list and show it
+                             let container = document.getElementById('playlist-list-container');
+                             let emptyContainer = document.getElementById('empty-playlist-container');
+                             
+                             if (emptyContainer && !emptyContainer.classList.contains('d-none')) {
+                                 emptyContainer.classList.add('d-none');
+                                 container.classList.remove('d-none');
+                             }
+
+                             const listGroup = document.getElementById('playlist-list-group');
+                             const newPlaylistHtml = `
+                                <form action="/playlists/${data.playlist.id}" method="POST" onsubmit="handlePlaylistSubmit(event, ${data.playlist.id})">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="song_id" value="{{ $song->id }}">
+                                    <button type="submit" id="playlist-btn-${data.playlist.id}" class="list-group-item list-group-item-action bg-dark-900 border-dark-700 d-flex justify-content-between align-items-center p-3">
+                                        <span class="fw-medium text-white">${data.playlist.name}</span>
+                                        <span class="badge bg-dark-700"><i class="bi bi-plus"></i> Tambah</span>
+                                    </button>
+                                </form>
+                             `;
+                             listGroup.insertAdjacentHTML('beforeend', newPlaylistHtml);
+                             
+                             // Reset form
+                             form.reset();
+
+                             // If we have a song_id hidden input in create form (we should add it), we can auto-add?
+                             // User flow: Create playlist -> It appears -> User clicks add.
+                             // Or better: Create playlist also adds current song?
+                             // Current implementation just creates.
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
             </script>
         </div>
     </div>
@@ -174,45 +252,66 @@
             </div>
             <div class="modal-body">
                 @if(Auth::user()->playlists->isEmpty())
-                    <div class="text-center py-4">
+                    <div id="empty-playlist-container" class="text-center py-4">
                         <i class="bi bi-music-player display-4 text-dark-300 mb-3 d-block"></i>
                         <p class="text-dark-200 mb-3">Anda belum memiliki playlist.</p>
-                        <form action="{{ route('playlists.store') }}" method="POST">
+                        <form action="{{ route('playlists.store') }}" method="POST" onsubmit="handleCreatePlaylist(event)">
                             @csrf
+                            <input type="hidden" name="song_id" value="{{ $song->id }}">
                             <div class="input-group">
                                 <input type="text" name="name" class="form-control form-control-dark" placeholder="Nama Playlist Baru..." required>
                                 <button class="btn btn-accent">Buat</button>
                             </div>
                         </form>
+                    </div>
+                    <div id="playlist-list-container" class="d-none">
+                         <p class="text-dark-300 mb-3 small">Pilih playlist untuk menambahkan lagu ini:</p>
+                        <div class="list-group list-group-flush rounded-3 overflow-hidden" id="playlist-list-group">
+                             <!-- Playlists will be injected here -->
+                        </div>
+                         <div class="mt-4 pt-3 border-top border-dark-700">
+                            <p class="text-dark-300 mb-2 small">Atau buat playlist baru:</p>
+                            <form action="{{ route('playlists.store') }}" method="POST" onsubmit="handleCreatePlaylist(event)">
+                                @csrf
+                                <input type="hidden" name="song_id" value="{{ $song->id }}">
+                                <div class="input-group">
+                                    <input type="text" name="name" class="form-control form-control-dark" placeholder="Nama Playlist Baru..." required>
+                                    <button class="btn btn-accent">Buat</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 @else
-                    <p class="text-dark-300 mb-3 small">Pilih playlist untuk menambahkan lagu ini:</p>
-                    <div class="list-group list-group-flush rounded-3 overflow-hidden">
-                        @foreach(Auth::user()->playlists as $playlist)
-                            <form action="{{ route('playlists.update', $playlist->id) }}" method="POST">
+                    <div id="playlist-list-container">
+                        <p class="text-dark-300 mb-3 small">Pilih playlist untuk menambahkan lagu ini:</p>
+                        <div class="list-group list-group-flush rounded-3 overflow-hidden" id="playlist-list-group">
+                            @foreach(Auth::user()->playlists as $playlist)
+                                <form action="{{ route('playlists.update', $playlist->id) }}" method="POST" onsubmit="handlePlaylistSubmit(event, {{ $playlist->id }})">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="song_id" value="{{ $song->id }}">
+                                    <button type="submit" id="playlist-btn-{{ $playlist->id }}" class="list-group-item list-group-item-action bg-dark-900 border-dark-700 d-flex justify-content-between align-items-center p-3">
+                                        <span class="fw-medium text-white">{{ $playlist->name }}</span>
+                                        @if($playlist->songs->contains($song->id))
+                                            <span class="badge bg-success"><i class="bi bi-check"></i> Sudah Ada</span>
+                                        @else
+                                            <span class="badge bg-dark-700"><i class="bi bi-plus"></i> Tambah</span>
+                                        @endif
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 pt-3 border-top border-dark-700">
+                            <p class="text-dark-300 mb-2 small">Atau buat playlist baru:</p>
+                            <form action="{{ route('playlists.store') }}" method="POST" onsubmit="handleCreatePlaylist(event)">
                                 @csrf
-                                @method('PUT')
                                 <input type="hidden" name="song_id" value="{{ $song->id }}">
-                                <button type="submit" class="list-group-item list-group-item-action bg-dark-900 border-dark-700 d-flex justify-content-between align-items-center p-3">
-                                    <span class="fw-medium text-white">{{ $playlist->name }}</span>
-                                    @if($playlist->songs->contains($song->id))
-                                        <span class="badge bg-success"><i class="bi bi-check"></i> Sudah Ada</span>
-                                    @else
-                                        <span class="badge bg-dark-700"><i class="bi bi-plus"></i> Tambah</span>
-                                    @endif
-                                </button>
+                                <div class="input-group">
+                                    <input type="text" name="name" class="form-control form-control-dark" placeholder="Nama Playlist Baru..." required>
+                                    <button class="btn btn-accent">Buat</button>
+                                </div>
                             </form>
-                        @endforeach
-                    </div>
-                    <div class="mt-4 pt-3 border-top border-dark-700">
-                        <p class="text-dark-300 mb-2 small">Atau buat playlist baru:</p>
-                        <form action="{{ route('playlists.store') }}" method="POST">
-                            @csrf
-                            <div class="input-group">
-                                <input type="text" name="name" class="form-control form-control-dark" placeholder="Nama Playlist Baru..." required>
-                                <button class="btn btn-accent">Buat</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 @endif
             </div>

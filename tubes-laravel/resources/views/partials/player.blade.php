@@ -1,4 +1,61 @@
 <div id="music-player" class="fixed-bottom bg-dark-950 border-top border-dark-700 p-3 fade-in" style="z-index: 1050; transition: transform 0.3s ease;">
+    <style>
+        /* Custom Range Slider Styling */
+        #seek-bar {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #495057;
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #seek-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            transition: transform 0.1s;
+            position: relative;
+            z-index: 2;
+        }
+
+        #seek-bar:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+        }
+        
+        #seek-bar::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            transition: transform 0.1s;
+        }
+
+        #seek-bar:hover::-moz-range-thumb {
+            transform: scale(1.2);
+        }
+        
+        #seek-bar:focus {
+            outline: none;
+        }
+
+        #seek-bar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+    
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="container-xxl d-flex align-items-center justify-content-between">
         <!-- Song Info -->
@@ -7,6 +64,7 @@
             <div class="overflow-hidden">
                 <h6 id="player-title" class="mb-0 text-truncate fw-bold text-white">Select a song</h6>
                 <small id="player-artist" class="text-dark-300 text-truncate">UKM Band</small>
+                <small id="loading-status" class="text-warning d-none" style="font-size: 10px;">Loading...</small>
             </div>
         </div>
 
@@ -27,7 +85,7 @@
             </div>
             <div class="w-100 d-flex align-items-center gap-2">
                 <span id="current-time" class="small text-dark-300" style="font-size: 10px; min-width: 35px;">0:00</span>
-                <input type="range" id="seek-bar" class="form-range flex-grow-1" min="0" value="0" step="1" onchange="seekAudio()" oninput="updateSeekUI()">
+                <input type="range" id="seek-bar" class="flex-grow-1" min="0" value="0" step="0.1">
                 <span id="duration" class="small text-dark-300" style="font-size: 10px; min-width: 35px;">0:00</span>
             </div>
         </div>
@@ -42,7 +100,7 @@
             </div>
         </div>
 
-        <audio id="global-audio" preload="none"></audio>
+        <audio id="global-audio"></audio>
     </div>
 </div>
 
@@ -53,6 +111,9 @@
     let isShuffle = false;
     let isRepeat = false;
     let previousVolume = 1;
+    let isDragging = false;
+    let currentBlobUrl = null;
+    let isAudioReady = false;
 
     const audio = document.getElementById('global-audio');
     const playBtn = document.getElementById('play-pause-btn');
@@ -66,8 +127,9 @@
     const repeatBtn = document.getElementById('repeat-btn');
     const muteBtn = document.getElementById('mute-btn');
     const volumeBar = document.getElementById('volume-bar');
+    const loadingStatus = document.getElementById('loading-status');
 
-    // Function to set a custom playlist (scoping the queue)
+    // Function to set a custom playlist
     function setQueue(newSongs) {
         playlist = newSongs;
         currentIndex = -1;
@@ -80,47 +142,111 @@
         playSong(songs[0].id);
     }
 
-    // Function to load and play a song by ID or Index
+    // Function to load and play a song by ID
     function playSong(id) {
         const index = playlist.findIndex(s => s.id == id);
         if (index !== -1) {
             currentIndex = index;
-            loadSong(playlist[currentIndex]);
-            audio.play();
-            updatePlayBtn(true);
+            loadSongWithBlob(playlist[currentIndex]);
             recordPlay(playlist[currentIndex].id);
         } else {
-            // If song is not in current playlist, likely from "Select a song" or search
-            // We might want to reset to global or add to queue? 
-            // For now, if passed ID is not in current scoped playlist, we fallback to global.
-            // User requested that clicking "Putar Playlist" scopes it.
-            // If user clicks "Play Now" on a song detail, it typically plays THAT song.
-            // If that song is not in the "playlist", what happens?
-            // To be safe: if song not found, we temporarily play it as single or switch to global.
-            // Let's reload global if not found, assuming "Play Now" means global context or single context.
-            // But for efficiency, let's just assume playSong is called with a visible song.
-            // If we are on Song Detail, we might want to ensure it plays.
-            // Let's fallback to global if not found.
             const global = @json($globalSongs ?? []);
             const globalIndex = global.findIndex(s => s.id == id);
             if (globalIndex !== -1) {
-                playlist = global; // Reset to global
+                playlist = global;
                 currentIndex = globalIndex;
-                loadSong(playlist[currentIndex]);
-                audio.play();
-                updatePlayBtn(true);
+                loadSongWithBlob(playlist[currentIndex]);
                 recordPlay(playlist[currentIndex].id);
             }
         }
     }
-    
-    // Record Play History
-    function recordPlay(songId) {
-        // Prevent spamming history if same song logs multiple times? Backend handles logic?
-        // Backend creates if new, updates if exists.
-        // We only call this on explicit play start.
-        if (!songId) return;
 
+    // Load song as blob to enable seeking without Range requests
+    async function loadSongWithBlob(song) {
+        // Update UI immediately
+        title.innerText = song.title;
+        artist.innerText = song.artist;
+        cover.src = "{{ asset('') }}" + song.cover_path;
+        
+        // Reset state
+        isAudioReady = false;
+        seekBar.disabled = true;
+        seekBar.value = 0;
+        currentTimeEl.innerText = "0:00";
+        durationEl.innerText = "Loading...";
+        loadingStatus.classList.remove('d-none');
+        updateSeekGradient();
+
+        // Clean up previous blob URL
+        if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl);
+            currentBlobUrl = null;
+        }
+
+        try {
+            // Fetch entire audio file
+            const response = await fetch("{{ asset('') }}" + song.file_path);
+            if (!response.ok) throw new Error('Failed to fetch audio');
+            
+            const blob = await response.blob();
+            currentBlobUrl = URL.createObjectURL(blob);
+            
+            // Set the blob URL as audio source
+            audio.src = currentBlobUrl;
+            
+            // Wait for metadata to load before playing
+            audio.addEventListener('loadedmetadata', function onMeta() {
+                audio.removeEventListener('loadedmetadata', onMeta);
+                isAudioReady = true;
+                seekBar.disabled = false;
+                seekBar.max = audio.duration;
+                durationEl.innerText = formatTime(audio.duration);
+                loadingStatus.classList.add('d-none');
+                updateSeekGradient();
+                attemptPlay();
+            }, { once: true });
+
+            // Handle errors
+            audio.addEventListener('error', function onError() {
+                audio.removeEventListener('error', onError);
+                console.error('Audio load error');
+                loadingStatus.innerText = 'Error';
+            }, { once: true });
+
+        } catch (error) {
+            console.error('Error loading audio:', error);
+            loadingStatus.innerText = 'Error';
+        }
+
+        // Set up media session
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title,
+                artist: song.artist,
+                artwork: [{ src: "{{ asset('') }}" + song.cover_path }]
+            });
+            navigator.mediaSession.setActionHandler('play', togglePlay);
+            navigator.mediaSession.setActionHandler('pause', togglePlay);
+            navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+            navigator.mediaSession.setActionHandler('nexttrack', nextSong);
+        }
+    }
+
+    function attemptPlay() {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                updatePlayBtn(true);
+            })
+            .catch(error => {
+                console.error("Autoplay prevented or interrupted:", error);
+                updatePlayBtn(false);
+            });
+        }
+    }
+    
+    function recordPlay(songId) {
+        if (!songId) return;
         fetch(`/songs/${songId}/record-play`, {
             method: 'POST',
             headers: {
@@ -130,36 +256,15 @@
         }).catch(err => console.error('Error recording play:', err));
     }
 
-    function loadSong(song) {
-        title.innerText = song.title;
-        artist.innerText = song.artist;
-        cover.src = "{{ asset('') }}" + song.cover_path; // Handle asset path
-        audio.src = "{{ route('songs.stream', ':id') }}".replace(':id', song.id);
-        
-        // Update browser media session
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song.title,
-                artist: song.artist,
-                artwork: [{ src: "{{ asset('') }}" + song.cover_path }]
-            });
-            
-            navigator.mediaSession.setActionHandler('play', togglePlay);
-            navigator.mediaSession.setActionHandler('pause', togglePlay);
-            navigator.mediaSession.setActionHandler('previoustrack', prevSong);
-            navigator.mediaSession.setActionHandler('nexttrack', nextSong);
-        }
-    }
-
     function togglePlay() {
         if (currentIndex === -1 && playlist.length > 0) {
             playSong(playlist[0].id);
             return;
         }
-
+        if (!isAudioReady) return;
+        
         if (audio.paused) {
-            audio.play();
-            updatePlayBtn(true);
+            attemptPlay();
         } else {
             audio.pause();
             updatePlayBtn(false);
@@ -174,21 +279,17 @@
         if (currentIndex > 0) {
             currentIndex--;
         } else if (isRepeat) {
-             currentIndex = playlist.length - 1; // Wrap around if repeat is on
+             currentIndex = playlist.length - 1; 
         } else {
-            return; // Start of playlist
+            return; 
         }
-        
-        loadSong(playlist[currentIndex]);
-        audio.play();
-        updatePlayBtn(true);
+        loadSongWithBlob(playlist[currentIndex]);
         recordPlay(playlist[currentIndex].id);
     }
 
     function nextSong() {
         if (isShuffle) {
             let nextIndex = Math.floor(Math.random() * playlist.length);
-            // Avoid repeating same song if possible, unless only 1 song
             if (playlist.length > 1 && nextIndex === currentIndex) {
                 nextIndex = (nextIndex + 1) % playlist.length;
             }
@@ -197,15 +298,12 @@
             if (currentIndex < playlist.length - 1) {
                 currentIndex++;
             } else if (isRepeat) {
-                currentIndex = 0; // Wrap around
+                currentIndex = 0; 
             } else {
-                return; // End of playlist
+                return; 
             }
         }
-
-        loadSong(playlist[currentIndex]);
-        audio.play();
-        updatePlayBtn(true);
+        loadSongWithBlob(playlist[currentIndex]);
         recordPlay(playlist[currentIndex].id);
     }
 
@@ -226,22 +324,14 @@
             audio.muted = false;
             volumeBar.value = previousVolume;
             muteBtn.innerHTML = '<i class="bi bi-volume-up"></i>';
-            audio.volume = previousVolume; // Ensure volume is restored
+            audio.volume = previousVolume;
         } else {
             previousVolume = volumeBar.value;
             audio.muted = true;
             volumeBar.value = 0;
             muteBtn.innerHTML = '<i class="bi bi-volume-mute"></i>';
-            audio.volume = 0; // Ensure volume is set to 0
+            audio.volume = 0;
         }
-    }
-
-    function seekAudio() {
-        audio.currentTime = seekBar.value;
-    }
-    
-    function updateSeekUI() {
-        // Optional: Update displayed current time while dragging
     }
 
     function setVolume() {
@@ -257,15 +347,46 @@
         }
     }
 
-    // Audio Event Listeners
-    audio.addEventListener('timeupdate', () => {
-        seekBar.value = audio.currentTime;
-        currentTimeEl.innerText = formatTime(audio.currentTime);
-    });
+    // --- Seek Bar Logic ---
+    const startDrag = () => { isDragging = true; };
+    seekBar.addEventListener('mousedown', startDrag);
+    seekBar.addEventListener('touchstart', startDrag);
 
-    audio.addEventListener('loadedmetadata', () => {
-        seekBar.max = audio.duration;
-        durationEl.innerText = formatTime(audio.duration);
+    const onDrag = () => {
+        currentTimeEl.innerText = formatTime(seekBar.value);
+        updateSeekGradient();
+    };
+    seekBar.addEventListener('input', onDrag);
+
+    const endDrag = () => {
+        if (!isAudioReady) {
+            isDragging = false;
+            return;
+        }
+        const timeToSeek = Number(seekBar.value);
+        if (isFinite(timeToSeek) && timeToSeek >= 0 && timeToSeek <= audio.duration) {
+            audio.currentTime = timeToSeek;
+        }
+        isDragging = false;
+        updateSeekGradient();
+    };
+    seekBar.addEventListener('change', endDrag);
+
+    function updateSeekGradient() {
+        const value = seekBar.value;
+        const max = seekBar.max || 100; 
+        const percentage = (value / max) * 100;
+        seekBar.style.background = `linear-gradient(to right, var(--accent-color) ${percentage}%, #495057 ${percentage}%)`;
+    }
+
+    audio.addEventListener('timeupdate', () => {
+        if (!isDragging && isAudioReady) {
+            if (isFinite(audio.currentTime)) {
+                seekBar.value = audio.currentTime;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+                updateSeekGradient();
+            }
+        }
     });
 
     audio.addEventListener('ended', () => {
@@ -273,18 +394,21 @@
     });
 
     function formatTime(seconds) {
+        if (!isFinite(seconds)) return "0:00";
         const min = Math.floor(seconds / 60);
         const sec = Math.floor(seconds % 60);
         return `${min}:${sec < 10 ? '0' : ''}${sec}`;
     }
 
-    // Expose playSong to global scope so card clicks can trigger it
-    // CAUTION: This overrides the default navigation link behavior if we want seamless play.
-    // However, user asked for clickable cards to go to show page in step 1146.
-    // "Lagu di playlist seharusnya ke beranda lagunya".
-    // "Down add currently playing song so we can do previous or next".
-    // So the persistent player is FOR control, but cards might still navigate.
-    // If we want the player to persist, we CANNOT navigate.
-    // But this is MPA.
-    // I will stick to: Player is present. If you play from player, it plays.
+    // Make functions available globally so onclick handlers work
+    window.playSong = playSong;
+    window.setQueue = setQueue;
+    window.playPlaylist = playPlaylist;
+    window.togglePlay = togglePlay;
+    window.prevSong = prevSong;
+    window.nextSong = nextSong;
+    window.toggleShuffle = toggleShuffle;
+    window.toggleRepeat = toggleRepeat;
+    window.toggleMute = toggleMute;
+    window.setVolume = setVolume;
 </script>

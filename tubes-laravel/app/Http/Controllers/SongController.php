@@ -53,7 +53,7 @@ class SongController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function like(Song $song)
+    public function like(Request $request, Song $song)
     {
         $user = Auth::user();
 

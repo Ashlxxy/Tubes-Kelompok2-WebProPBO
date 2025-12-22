@@ -36,7 +36,7 @@
   </style>
   @stack('styles')
 </head>
-<body class="bg-dark-950 text-white d-flex flex-column min-vh-100">
+<body class="bg-dark-950 text-white d-flex flex-column min-vh-100" style="padding-top: 76px;">
 
   <div id="navbar-wrapper">
     @include('layouts.navbar')

@@ -18,7 +18,16 @@ class PlaylistController extends Controller
     public function store(Request $request)
     {
         $request->validate(['name' => 'required']);
-        Auth::user()->playlists()->create(['name' => $request->name]);
+        $playlist = Auth::user()->playlists()->create(['name' => $request->name]);
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Playlist berhasil dibuat.',
+                'playlist' => $playlist
+            ]);
+        }
+
         return back()->with('success', 'Playlist berhasil dibuat.');
     }
 
@@ -28,18 +37,31 @@ class PlaylistController extends Controller
         
         if ($request->has('song_id')) {
             if ($playlist->songs()->where('song_id', $request->song_id)->exists()) {
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Lagu sudah ada di playlist.']);
+                }
                 return back()->with('error', 'Lagu sudah ada di playlist.');
             }
             $playlist->songs()->attach($request->song_id);
+            
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Lagu berhasil ditambahkan ke playlist.']);
+            }
             return back()->with('success', 'Lagu berhasil ditambahkan ke playlist.');
         }
         
         if ($request->has('remove_song_id')) {
             $playlist->songs()->detach($request->remove_song_id);
+             if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => 'Lagu dihapus dari playlist.']);
+            }
             return back()->with('success', 'Lagu dihapus dari playlist.');
         }
 
         $playlist->update($request->only('name'));
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Playlist diperbarui.']);
+        }
         return back()->with('success', 'Playlist diperbarui.');
     }
 
