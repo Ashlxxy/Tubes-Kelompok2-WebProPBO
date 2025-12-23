@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/songs/{song}/record-play', [SongController::class, 'recordPlay'])->name('songs.recordPlay');
     Route::post('/songs/{song}/like', [SongController::class, 'like'])->name('songs.like');
     Route::post('/songs/{song}/comments', [SongController::class, 'storeComment'])->name('songs.comments.store');
+    Route::delete('/comments/{comment}', [SongController::class, 'destroyComment'])->name('comments.destroy');
     Route::resource('playlists', PlaylistController::class);
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
     Route::resource('feedback', FeedbackController::class)->only(['index', 'store']);

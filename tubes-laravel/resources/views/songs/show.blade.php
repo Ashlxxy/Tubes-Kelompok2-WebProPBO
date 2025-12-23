@@ -76,9 +76,22 @@
                 @forelse($song->comments->where('parent_id', null) as $comment)
                     <!-- Parent Comment -->
                     <div class="list-group-item bg-dark-900 border-dark-700 p-3">
-                        <div class="d-flex justify-content-between mb-1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="fw-bold text-white">{{ $comment->user->name }}</span>
-                            <small class="text-dark-300">{{ $comment->created_at->diffForHumans() }}</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <small class="text-dark-300">{{ $comment->created_at->diffForHumans() }}</small>
+                                @auth
+                                    @if(Auth::user()->role === 'admin')
+                                        <form id="delete-form-{{ $comment->id }}" action="{{ route('comments.destroy', $comment->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-sm btn-outline-danger p-0 px-1 border-0" title="Hapus Komentar" onclick="showDeleteModal('{{ route('comments.destroy', $comment->id) }}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endauth
+                            </div>
                         </div>
                         <p class="mb-2 text-white">{{ $comment->content }}</p>
                         
@@ -103,9 +116,22 @@
                             <div class="ms-4 border-start border-dark-700 ps-3 mt-2">
                                 @foreach($comment->replies as $reply)
                                     <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold text-white small">{{ $reply->user->name }}</span>
-                                            <small class="text-dark-300" style="font-size: 0.75rem;">{{ $reply->created_at->diffForHumans() }}</small>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <small class="text-dark-300" style="font-size: 0.75rem;">{{ $reply->created_at->diffForHumans() }}</small>
+                                                @auth
+                                                    @if(Auth::user()->role === 'admin')
+                                                        <form id="delete-form-reply-{{ $reply->id }}" action="{{ route('comments.destroy', $reply->id) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="button" class="btn btn-sm btn-outline-danger p-0 px-1 border-0" title="Hapus Balasan" style="font-size: 0.75rem;" onclick="showDeleteModal('{{ route('comments.destroy', $reply->id) }}')">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @endauth
+                                            </div>
                                         </div>
                                         <p class="mb-0 text-dark-200 small">{{ $reply->content }}</p>
                                     </div>
@@ -349,5 +375,41 @@
         </div>
     </div>
 </div>
+@endauth
+
+<!-- Delete Confirmation Modal -->
+@auth
+@if(Auth::user()->role === 'admin')
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content card-dark border-danger">
+            <div class="modal-header border-dark-700">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-trash display-4 text-danger mb-3 d-block"></i>
+                <p class="text-white mb-0">Apakah Anda yakin ingin menghapus komentar ini?</p>
+                <p class="text-dark-300 small">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer border-dark-700 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteCommentForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDeleteModal(actionUrl) {
+        document.getElementById('deleteCommentForm').action = actionUrl;
+        new bootstrap.Modal(document.getElementById('deleteCommentModal')).show();
+    }
+</script>
+@endif
 @endauth
 @endsection

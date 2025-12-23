@@ -95,6 +95,17 @@ class SongController extends Controller
 
         return back()->with('success', 'Komentar berhasil ditambahkan!');
     }
+
+    public function destroyComment(Comment $comment)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $comment->delete();
+
+        return back()->with('success', 'Komentar berhasil dihapus!');
+    }
     
     public function stream(Song $song)
     {
