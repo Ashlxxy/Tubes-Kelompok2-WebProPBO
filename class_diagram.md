@@ -60,6 +60,7 @@ classDiagram
     User "1" --> "*" History : records
     User "*" --> "*" Song : likes
     User "1" --> "*" Comment : writes
+    User "1" --> "*" Feedback : creates
     
     Playlist "*" --> "*" Song : contains
     
