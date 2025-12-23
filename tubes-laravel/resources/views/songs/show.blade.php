@@ -56,7 +56,7 @@
     <!-- Comments Section -->
     <div class="row mt-5">
         <div class="col-lg-8 offset-lg-4">
-            <h4 class="mb-3">Komentar</h4>
+            <h4 class="mb-3">Komentar <!-- Admin Delete Active --></h4>
             
             @auth
             <form action="{{ route('songs.comments.store', $song->id) }}" method="POST" class="mb-4">
