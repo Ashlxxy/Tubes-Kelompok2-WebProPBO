@@ -1,6 +1,5 @@
 <div id="music-player" class="fixed-bottom bg-dark-950 border-top border-dark-700 fade-in" style="z-index: 1050; transition: transform 0.3s ease;">
     <style>
-        /* Custom Range Slider Styling */
         #seek-bar {
             -webkit-appearance: none;
             width: 100%;
@@ -55,7 +54,6 @@
             cursor: not-allowed;
         }
 
-        /* Mobile Player Styles */
         @media (max-width: 768px) {
             #music-player {
                 padding: 8px 12px !important;
@@ -95,9 +93,7 @@
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- Desktop Player -->
     <div class="container-xxl player-desktop align-items-center justify-content-between">
-        <!-- Song Info -->
         <div class="d-flex align-items-center gap-3" style="width: 30%;">
             <img id="player-cover" src="{{ asset('assets/img/logo.png') }}" class="rounded bg-dark-800" width="56" height="56" style="object-fit: cover;">
             <div class="overflow-hidden">
@@ -107,7 +103,6 @@
             </div>
         </div>
 
-        <!-- Controls -->
         <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 mx-3" style="max-width: 500px;">
             <div class="d-flex align-items-center gap-3 mb-2">
                 <button class="btn btn-sm btn-link text-dark-300 hover-text-white" id="shuffle-btn" onclick="toggleShuffle()" title="Shuffle">
@@ -129,7 +124,6 @@
             </div>
         </div>
 
-        <!-- Volume & Extras -->
         <div class="d-flex align-items-center justify-content-end gap-3" style="width: 30%;">
            <div class="d-flex align-items-center gap-2" style="width: 120px;">
                 <button class="btn btn-sm btn-link text-dark-300 hover-text-white p-0" onclick="toggleMute()" id="mute-btn">
@@ -140,9 +134,7 @@
         </div>
     </div>
 
-    <!-- Mobile Player -->
     <div class="player-mobile flex-column">
-        <!-- Row 1: Song Info + Controls -->
         <div class="d-flex align-items-center justify-content-between w-100 mb-2">
             <div class="d-flex align-items-center gap-2 flex-grow-1 overflow-hidden">
                 <img id="player-cover-mobile" src="{{ asset('assets/img/logo.png') }}" class="rounded bg-dark-800" style="object-fit: cover; width: 48px; height: 48px;">
@@ -165,7 +157,6 @@
                 </button>
             </div>
         </div>
-        <!-- Row 2: Seek Bar -->
         <div class="d-flex align-items-center gap-2 w-100">
             <span id="current-time-mobile" class="small text-dark-300" style="font-size: 10px; min-width: 30px;">0:00</span>
             <input type="range" id="seek-bar-mobile" class="flex-grow-1" min="0" value="0" step="0.1" style="height: 4px;">
@@ -177,7 +168,6 @@
 </div>
 
 <script>
-    // Global Playlist Data
     let playlist = @json($globalSongs ?? []);
     let currentIndex = -1;
     let isShuffle = false;
@@ -189,7 +179,6 @@
 
     const audio = document.getElementById('global-audio');
     
-    // Desktop elements
     const playBtn = document.getElementById('play-pause-btn');
     const cover = document.getElementById('player-cover');
     const title = document.getElementById('player-title');
@@ -203,7 +192,6 @@
     const volumeBar = document.getElementById('volume-bar');
     const loadingStatus = document.getElementById('loading-status');
 
-    // Mobile elements
     const playBtnMobile = document.getElementById('play-pause-btn-mobile');
     const coverMobile = document.getElementById('player-cover-mobile');
     const titleMobile = document.getElementById('player-title-mobile');
@@ -214,20 +202,17 @@
     const shuffleBtnMobile = document.getElementById('shuffle-btn-mobile');
     const repeatBtnMobile = document.getElementById('repeat-btn-mobile');
 
-    // Function to set a custom playlist
     function setQueue(newSongs) {
         playlist = newSongs;
         currentIndex = -1;
     }
 
-    // Play a full playlist
     function playPlaylist(songs) {
         if (!songs || songs.length === 0) return;
         setQueue(songs);
         playSong(songs[0].id);
     }
 
-    // Function to load and play a song by ID
     function playSong(id) {
         const index = playlist.findIndex(s => s.id == id);
         if (index !== -1) {
@@ -246,9 +231,7 @@
         }
     }
 
-    // Load song directly (Streaming)
     function loadSong(song) {
-        // Update UI immediately (both desktop and mobile)
         title.innerText = song.title;
         artist.innerText = song.artist;
         cover.src = "{{ asset('') }}" + song.cover_path;
@@ -256,17 +239,14 @@
         artistMobile.innerText = song.artist;
         coverMobile.src = "{{ asset('') }}" + song.cover_path;
         
-        // Reset state
         isAudioReady = false;
         loadingStatus.classList.remove('d-none');
         durationEl.innerText = "Loading...";
         durationElMobile.innerText = "...";
         
-        // Set audio source directly to allow streaming
         audio.src = "{{ asset('') }}" + song.file_path;
         audio.load();
 
-        // Wait for metadata to load
         audio.addEventListener('loadedmetadata', function onMeta() {
             isAudioReady = true;
             seekBar.disabled = false;
@@ -280,14 +260,12 @@
             attemptPlay();
         }, { once: true });
 
-        // Handle errors
         audio.addEventListener('error', function onError(e) {
             console.error('Audio load error', e);
             loadingStatus.innerText = 'Error';
             loadingStatus.classList.remove('d-none');
         }, { once: true });
 
-        // Set up media session
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song.title,
@@ -421,7 +399,6 @@
         }
     }
 
-    // --- Seek Bar Logic ---
     const startDrag = () => { isDragging = true; };
     seekBar.addEventListener('mousedown', startDrag);
     seekBar.addEventListener('touchstart', startDrag);
@@ -454,7 +431,6 @@
         seekBarMobile.style.background = `linear-gradient(to right, var(--accent) ${percentage}%, #495057 ${percentage}%)`;
     }
 
-    // Mobile seek bar listeners
     seekBarMobile.addEventListener('mousedown', startDrag);
     seekBarMobile.addEventListener('touchstart', startDrag);
     seekBarMobile.addEventListener('input', () => {
@@ -498,7 +474,6 @@
         return `${min}:${sec < 10 ? '0' : ''}${sec}`;
     }
 
-    // Make functions available globally so onclick handlers work
     window.playSong = playSong;
     window.setQueue = setQueue;
     window.playPlaylist = playPlaylist;
