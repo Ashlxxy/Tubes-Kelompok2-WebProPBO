@@ -42,7 +42,6 @@
                 const hours = Math.floor(diffInSeconds / 3600);
                 timeString = `${hours} jam yang lalu`;
             } else {
-                // Determine if we should show days or formatted date
                 const days = Math.floor(diffInSeconds / 86400);
                 if (days < 7) {
                     timeString = `${days} hari yang lalu`;
@@ -55,8 +54,6 @@
         });
     }
 
-    // Update every minute
     setInterval(updateTimeago, 60000);
-    // Run once on load to ensure sync if needed, though blade diffForHumans handles initial render
 </script>
 @endsection

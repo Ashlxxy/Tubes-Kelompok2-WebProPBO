@@ -102,14 +102,12 @@
         const btn = document.getElementById('view-all-descriptions-btn');
         
         if (hiddenItems.length > 0) {
-            // Show all
             hiddenItems.forEach(item => {
                 item.classList.remove('d-none');
-                item.classList.add('d-block-forced'); // Marker class
+                item.classList.add('d-block-forced');
             });
             btn.innerHTML = 'Sembunyikan <i class="bi bi-chevron-up"></i>';
         } else {
-            // Hide those we forced open
             const forcedItems = document.querySelectorAll('.description-item.d-block-forced');
             forcedItems.forEach(item => {
                 item.classList.add('d-none');

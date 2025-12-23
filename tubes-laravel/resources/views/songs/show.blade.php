@@ -157,7 +157,6 @@
                 }
 
                 function showToast(message, isSuccess = true) {
-                    // Remove existing toast if any
                     const existingToast = document.getElementById('dynamic-toast');
                     if (existingToast) existingToast.remove();
 
@@ -175,7 +174,6 @@
                     `;
                     document.body.insertAdjacentHTML('beforeend', toastHtml);
                     
-                    // Auto-remove after 3 seconds
                     setTimeout(() => {
                         const toast = document.getElementById('dynamic-toast');
                         if (toast) toast.remove();
@@ -232,7 +230,6 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.playlist) {
-                             // Add new playlist to list and show it
                              let container = document.getElementById('playlist-list-container');
                              let emptyContainer = document.getElementById('empty-playlist-container');
                              
@@ -255,10 +252,8 @@
                              `;
                              listGroup.insertAdjacentHTML('beforeend', newPlaylistHtml);
                              
-                             // Reset form
                              form.reset();
                              
-                             // Show toast
                              showToast(data.message, true);
                         } else {
                             showToast(data.message || 'Gagal membuat playlist.', false);

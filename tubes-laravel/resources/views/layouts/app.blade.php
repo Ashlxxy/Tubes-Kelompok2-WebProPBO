@@ -12,14 +12,12 @@
   <script src="https://unpkg.com/swup@4"></script>
   <script src="https://unpkg.com/@swup/forms-plugin@4"></script>
   <style>
-      /* Custom Animations */
       .fade-in { animation: fadeIn 0.8s ease-in-out; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       
       .hover-scale { transition: transform 0.3s ease; }
       .hover-scale:hover { transform: scale(1.03); }
       
-      /* Swup Transitions */
       .transition-fade {
         transition: 0.4s;
         opacity: 1;
@@ -28,9 +26,8 @@
         opacity: 0;
       }
       
-      /* Custom Audio Player Styling */
       audio {
-          filter: invert(1) hue-rotate(180deg); /* Simple dark mode trick for default player */
+          filter: invert(1) hue-rotate(180deg);
           border-radius: 30px;
       }
   </style>
@@ -63,30 +60,17 @@
   <script>
       const swup = new Swup({
         containers: ["#swup", "#navbar-wrapper"],
-        cache: false, // Disable cache to ensure fresh data
+        cache: false,
       });
       
-      // Re-init Bootstrap components like Modals after content replace
       swup.hooks.on('content:replace', () => {
-          // Re-initialize Bootstrap modals/tooltips if needed
-          // But purely data-bs-toggle usually works via delegated events in BS5?
-          // Actually BS5 mostly uses delegation, but tooltips need init.
-          // Modals might need checking.
-          
-          // Re-trigger fade-ins
           const fadeElements = document.querySelectorAll('.fade-in');
           fadeElements.forEach(el => {
               el.style.animation = 'none';
-              el.offsetHeight; /* trigger reflow */
+              el.offsetHeight;
               el.style.animation = null; 
           });
           
-          // Execute scripts in the new content??
-          // Swup 4 by default does NOT execute scripts in head/body unless using the Scripts plugin.
-          // However, we are not installing plugins via npm here easily.
-          // We can manually execute scripts found in the new container.
-          
-          // Simple script runner for inline scripts in the new container
           const scripts = document.querySelectorAll('#swup script');
           scripts.forEach(script => {
               const newScript = document.createElement('script');
