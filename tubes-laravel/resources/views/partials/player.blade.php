@@ -1,4 +1,4 @@
-<div id="music-player" class="fixed-bottom bg-dark-950 border-top border-dark-700 p-3 fade-in" style="z-index: 1050; transition: transform 0.3s ease;">
+<div id="music-player" class="fixed-bottom bg-dark-950 border-top border-dark-700 fade-in" style="z-index: 1050; transition: transform 0.3s ease;">
     <style>
         /* Custom Range Slider Styling */
         #seek-bar {
@@ -54,16 +54,55 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* Mobile Player Styles */
+        @media (max-width: 768px) {
+            #music-player {
+                padding: 8px 12px !important;
+            }
+            #music-player .player-desktop {
+                display: none !important;
+            }
+            #music-player .player-mobile {
+                display: flex !important;
+            }
+            #player-cover-mobile {
+                width: 48px;
+                height: 48px;
+            }
+            #player-title-mobile {
+                font-size: 13px;
+                max-width: 120px;
+            }
+            #player-artist-mobile {
+                font-size: 11px;
+                max-width: 120px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            #music-player {
+                padding: 12px 24px;
+            }
+            #music-player .player-mobile {
+                display: none !important;
+            }
+            #music-player .player-desktop {
+                display: flex !important;
+            }
+        }
     </style>
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <div class="container-xxl d-flex align-items-center justify-content-between">
+    
+    <!-- Desktop Player -->
+    <div class="container-xxl player-desktop align-items-center justify-content-between">
         <!-- Song Info -->
         <div class="d-flex align-items-center gap-3" style="width: 30%;">
             <img id="player-cover" src="{{ asset('assets/img/logo.png') }}" class="rounded bg-dark-800" width="56" height="56" style="object-fit: cover;">
             <div class="overflow-hidden">
                 <h6 id="player-title" class="mb-0 text-truncate fw-bold text-white">Select a song</h6>
-                <small id="player-artist" class="text-dark-300 text-truncate">UKM Band</small>
+                <small id="player-artist" class="text-dark-300 text-truncate d-block">UKM Band</small>
                 <small id="loading-status" class="text-warning d-none" style="font-size: 10px;">Loading...</small>
             </div>
         </div>
@@ -99,9 +138,42 @@
                 <input type="range" id="volume-bar" class="form-range" min="0" max="1" step="0.1" value="1" onchange="setVolume()">
             </div>
         </div>
-
-        <audio id="global-audio"></audio>
     </div>
+
+    <!-- Mobile Player -->
+    <div class="player-mobile flex-column">
+        <!-- Row 1: Song Info + Controls -->
+        <div class="d-flex align-items-center justify-content-between w-100 mb-2">
+            <div class="d-flex align-items-center gap-2 flex-grow-1 overflow-hidden">
+                <img id="player-cover-mobile" src="{{ asset('assets/img/logo.png') }}" class="rounded bg-dark-800" style="object-fit: cover; width: 48px; height: 48px;">
+                <div class="overflow-hidden">
+                    <div id="player-title-mobile" class="text-truncate fw-bold text-white" style="font-size: 13px;">Select a song</div>
+                    <div id="player-artist-mobile" class="text-dark-300 text-truncate" style="font-size: 11px;">UKM Band</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button class="btn btn-sm btn-link text-dark-300 p-1" id="shuffle-btn-mobile" onclick="toggleShuffle()">
+                    <i class="bi bi-shuffle"></i>
+                </button>
+                <button class="btn btn-sm btn-link text-dark-300 p-1" onclick="prevSong()"><i class="bi bi-skip-start-fill fs-5"></i></button>
+                <button id="play-pause-btn-mobile" class="btn btn-accent rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" onclick="togglePlay()">
+                    <i class="bi bi-play-fill fs-5"></i>
+                </button>
+                <button class="btn btn-sm btn-link text-dark-300 p-1" onclick="nextSong()"><i class="bi bi-skip-end-fill fs-5"></i></button>
+                <button class="btn btn-sm btn-link text-dark-300 p-1" id="repeat-btn-mobile" onclick="toggleRepeat()">
+                    <i class="bi bi-repeat"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Row 2: Seek Bar -->
+        <div class="d-flex align-items-center gap-2 w-100">
+            <span id="current-time-mobile" class="small text-dark-300" style="font-size: 10px; min-width: 30px;">0:00</span>
+            <input type="range" id="seek-bar-mobile" class="flex-grow-1" min="0" value="0" step="0.1" style="height: 4px;">
+            <span id="duration-mobile" class="small text-dark-300" style="font-size: 10px; min-width: 30px;">0:00</span>
+        </div>
+    </div>
+
+    <audio id="global-audio"></audio>
 </div>
 
 <script>
@@ -116,6 +188,8 @@
     let isAudioReady = false;
 
     const audio = document.getElementById('global-audio');
+    
+    // Desktop elements
     const playBtn = document.getElementById('play-pause-btn');
     const cover = document.getElementById('player-cover');
     const title = document.getElementById('player-title');
@@ -128,6 +202,17 @@
     const muteBtn = document.getElementById('mute-btn');
     const volumeBar = document.getElementById('volume-bar');
     const loadingStatus = document.getElementById('loading-status');
+
+    // Mobile elements
+    const playBtnMobile = document.getElementById('play-pause-btn-mobile');
+    const coverMobile = document.getElementById('player-cover-mobile');
+    const titleMobile = document.getElementById('player-title-mobile');
+    const artistMobile = document.getElementById('player-artist-mobile');
+    const seekBarMobile = document.getElementById('seek-bar-mobile');
+    const currentTimeElMobile = document.getElementById('current-time-mobile');
+    const durationElMobile = document.getElementById('duration-mobile');
+    const shuffleBtnMobile = document.getElementById('shuffle-btn-mobile');
+    const repeatBtnMobile = document.getElementById('repeat-btn-mobile');
 
     // Function to set a custom playlist
     function setQueue(newSongs) {
@@ -163,15 +248,19 @@
 
     // Load song directly (Streaming)
     function loadSong(song) {
-        // Update UI immediately
+        // Update UI immediately (both desktop and mobile)
         title.innerText = song.title;
         artist.innerText = song.artist;
         cover.src = "{{ asset('') }}" + song.cover_path;
+        titleMobile.innerText = song.title;
+        artistMobile.innerText = song.artist;
+        coverMobile.src = "{{ asset('') }}" + song.cover_path;
         
         // Reset state
         isAudioReady = false;
         loadingStatus.classList.remove('d-none');
         durationEl.innerText = "Loading...";
+        durationElMobile.innerText = "...";
         
         // Set audio source directly to allow streaming
         audio.src = "{{ asset('') }}" + song.file_path;
@@ -181,8 +270,11 @@
         audio.addEventListener('loadedmetadata', function onMeta() {
             isAudioReady = true;
             seekBar.disabled = false;
+            seekBarMobile.disabled = false;
             seekBar.max = audio.duration;
+            seekBarMobile.max = audio.duration;
             durationEl.innerText = formatTime(audio.duration);
+            durationElMobile.innerText = formatTime(audio.duration);
             loadingStatus.classList.add('d-none');
             updateSeekGradient();
             attemptPlay();
@@ -250,6 +342,7 @@
 
     function updatePlayBtn(isPlaying) {
         playBtn.innerHTML = isPlaying ? '<i class="bi bi-pause-fill fs-4"></i>' : '<i class="bi bi-play-fill fs-4 ms-1"></i>';
+        playBtnMobile.innerHTML = isPlaying ? '<i class="bi bi-pause-fill fs-5"></i>' : '<i class="bi bi-play-fill fs-5"></i>';
     }
 
     function prevSong() {
@@ -288,12 +381,16 @@
         isShuffle = !isShuffle;
         shuffleBtn.classList.toggle('text-accent', isShuffle);
         shuffleBtn.classList.toggle('text-dark-300', !isShuffle);
+        shuffleBtnMobile.classList.toggle('text-accent', isShuffle);
+        shuffleBtnMobile.classList.toggle('text-dark-300', !isShuffle);
     }
 
     function toggleRepeat() {
         isRepeat = !isRepeat;
         repeatBtn.classList.toggle('text-accent', isRepeat);
         repeatBtn.classList.toggle('text-dark-300', !isRepeat);
+        repeatBtnMobile.classList.toggle('text-accent', isRepeat);
+        repeatBtnMobile.classList.toggle('text-dark-300', !isRepeat);
     }
 
     function toggleMute() {
@@ -353,14 +450,38 @@
         const value = seekBar.value;
         const max = seekBar.max || 100; 
         const percentage = (value / max) * 100;
-        seekBar.style.background = `linear-gradient(to right, var(--accent-color) ${percentage}%, #495057 ${percentage}%)`;
+        seekBar.style.background = `linear-gradient(to right, var(--accent) ${percentage}%, #495057 ${percentage}%)`;
+        seekBarMobile.style.background = `linear-gradient(to right, var(--accent) ${percentage}%, #495057 ${percentage}%)`;
     }
+
+    // Mobile seek bar listeners
+    seekBarMobile.addEventListener('mousedown', startDrag);
+    seekBarMobile.addEventListener('touchstart', startDrag);
+    seekBarMobile.addEventListener('input', () => {
+        currentTimeElMobile.innerText = formatTime(seekBarMobile.value);
+        seekBar.value = seekBarMobile.value;
+        updateSeekGradient();
+    });
+    seekBarMobile.addEventListener('change', () => {
+        if (!isAudioReady) {
+            isDragging = false;
+            return;
+        }
+        const timeToSeek = Number(seekBarMobile.value);
+        if (isFinite(timeToSeek) && timeToSeek >= 0 && timeToSeek <= audio.duration) {
+            audio.currentTime = timeToSeek;
+        }
+        isDragging = false;
+        updateSeekGradient();
+    });
 
     audio.addEventListener('timeupdate', () => {
         if (!isDragging && isAudioReady) {
             if (isFinite(audio.currentTime)) {
                 seekBar.value = audio.currentTime;
+                seekBarMobile.value = audio.currentTime;
                 currentTimeEl.innerText = formatTime(audio.currentTime);
+                currentTimeElMobile.innerText = formatTime(audio.currentTime);
                 updateSeekGradient();
             }
         }
