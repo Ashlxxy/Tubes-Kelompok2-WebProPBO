@@ -1,4 +1,4 @@
-# UKM Band - Aplikasi Musik (Laravel Version)
+# UKM Band - Aplikasi Musik 
 
 Aplikasi pemutar musik berbasis web yang modern dan dinamis untuk UKM Band Universitas Telkom. Dibangun menggunakan framework **Laravel 10**, aplikasi ini menawarkan pengalaman mendengarkan musik yang interaktif dengan fitur manajemen playlist, like, komentar, dan dashboard admin yang lengkap.
 
